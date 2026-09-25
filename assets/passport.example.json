@@ -1,0 +1,135 @@
+{
+  "schema_version": 1,
+  "project": "example",
+  "environment": "staging",
+  "components": [
+    "application"
+  ],
+  "release": {
+    "commit": "REPLACE_WITH_COMMIT",
+    "scope_digest": "REPLACE_WITH_SOURCE_SHA256",
+    "artifact_sha256": "REPLACE_WITH_ARTIFACT_SHA256"
+  },
+  "domains": {
+    "requirements": {
+      "applicable": true,
+      "checks": [
+        {
+          "id": "requirements",
+          "component": "application",
+          "method": "automated",
+          "criterion": "Acceptance and abuse cases pass",
+          "max_age_hours": 24
+        }
+      ]
+    },
+    "architecture": {
+      "applicable": true,
+      "checks": [
+        {
+          "id": "architecture",
+          "component": "application",
+          "method": "manual",
+          "criterion": "Trust boundaries and failure dependencies reviewed",
+          "max_age_hours": 24
+        }
+      ]
+    },
+    "security": {
+      "applicable": true,
+      "checks": [
+        {
+          "id": "security",
+          "component": "application",
+          "method": "automated",
+          "criterion": "Cross-user and anonymous access denied as required",
+          "max_age_hours": 24
+        }
+      ]
+    },
+    "supply_chain": {
+      "applicable": true,
+      "checks": [
+        {
+          "id": "supply_chain",
+          "component": "application",
+          "method": "automated",
+          "criterion": "Dependencies and artifact provenance reviewed",
+          "max_age_hours": 24
+        }
+      ]
+    },
+    "infrastructure": {
+      "applicable": true,
+      "checks": [
+        {
+          "id": "infrastructure",
+          "component": "application",
+          "method": "automated",
+          "criterion": "Deployed permissions and network exposure reviewed",
+          "max_age_hours": 24
+        }
+      ]
+    },
+    "data": {
+      "applicable": true,
+      "checks": [
+        {
+          "id": "data",
+          "component": "application",
+          "method": "automated",
+          "criterion": "Migration and restoration verified",
+          "max_age_hours": 24
+        }
+      ]
+    },
+    "reliability": {
+      "applicable": true,
+      "checks": [
+        {
+          "id": "reliability",
+          "component": "application",
+          "method": "automated",
+          "criterion": "Retries and duplicate delivery preserve invariants",
+          "max_age_hours": 24
+        }
+      ]
+    },
+    "performance": {
+      "applicable": true,
+      "checks": [
+        {
+          "id": "performance",
+          "component": "application",
+          "method": "automated",
+          "criterion": "Measured latency and cost meet project budgets",
+          "max_age_hours": 24
+        }
+      ]
+    },
+    "experience": {
+      "applicable": true,
+      "checks": [
+        {
+          "id": "experience",
+          "component": "application",
+          "method": "automated",
+          "criterion": "Essential mobile and accessible flows pass",
+          "max_age_hours": 24
+        }
+      ]
+    },
+    "operations": {
+      "applicable": true,
+      "checks": [
+        {
+          "id": "operations",
+          "component": "application",
+          "method": "automated",
+          "criterion": "Alerts, rollback and recovery drills meet project objectives",
+          "max_age_hours": 24
+        }
+      ]
+    }
+  }
+}

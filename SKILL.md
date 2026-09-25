@@ -55,6 +55,8 @@ When fixes are authorized, apply scoped changes, run focused tests and check reg
 
 ## Verify readiness
 
+For a whole-product production audit, read [production-2.md](references/production-2.md). Use the project-owned passport and scripts/readiness.py to plan all ten domains and evaluate release-bound evidence and the issue ledger. Start from assets/passport.example.json and replace illustrative criteria with measurable project requirements. Record exclusions explicitly. Existing scanners are evidence producers; do not claim that the readiness coordinator itself runs business, infrastructure, load or recovery tests. Protect policy and issue-ledger ownership separately from untrusted reports.
+
 Read [quality-gates.md](references/quality-gates.md). Run applicable project tests, lint, types and build; inspect their scripts before execution. For UI changes use the real app, mobile and target browsers. Verify loading/empty/error/offline states, navigation, keyboard access and all affected buttons. Run security and operational gates according to risk, not a generic score.
 
 Use the evidence table from workflow.md. For every applicable gate record command or procedure, revision/build, timestamp, environment, result and artifact. `PASS`, `FAIL`, `BLOCKED`, `NOT_RUN`, and justified `NOT_APPLICABLE` are distinct. Partial evidence cannot become PASS. A tool exit 0 is evidence for that tool only.

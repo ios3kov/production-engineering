@@ -1,5 +1,18 @@
 # Production Engineering
 
+## Версия 2.0: целостная проверка продукта
+
+Добавлен офлайн-координатор `scripts/readiness.py`: паспорт проекта охватывает требования, архитектуру, безопасность, цепочку поставки, инфраструктуру, данные, надёжность, производительность, UX и эксплуатацию. Каждый результат связан с планом, исходниками, артефактом и окружением. Пропуски и устаревшие доказательства блокируют проверку; исправления требуют retest, исключения имеют срок действия.
+
+Контракт, каталог проверок и ограничения: [production-2.md](references/production-2.md). Шаблон: [passport.example.json](assets/passport.example.json). Шаблон не является выполненной проверкой.
+
+```bash
+python3 scripts/readiness.py passport.json
+python3 scripts/readiness.py passport.json --evidence evidence.json --issues issues.json
+```
+
+Координатор проверяет доказательства от доверенных CI-инструментов и ревьюеров. Реальные нагрузочные тесты, восстановление, инфраструктурные и бизнес-сценарии выполняются отдельно в разрешённом окружении. Совпадение хешей не доказывает подлинность результатов. Старые CLI сохранены.
+
 Разработка по ТЗ и проверка результата: **цель → спецификация → задачи → реализация → аудит → исправления → проверка**.
 
 Основа: [GitHub Spec Kit](https://github.com/github/spec-kit), [web-audit](https://github.com/haraldalder-vibemogger/web-audit) и [vibe-audit](https://github.com/haraldalder-vibemogger/vibe-audit). Это самостоятельный skill и CLI; полный Spec Kit CLI не включён.
@@ -47,7 +60,7 @@ python3 -m unittest discover -s scripts/tests -v
 python3 -m compileall -q scripts
 ```
 
-57 регрессионных тестов. Автоматический CI описан в `.github/workflows/tests.yml`; статус конкретного запуска смотрите в Actions.
+63 регрессионных тестов. Автоматический CI описан в `.github/workflows/tests.yml`; статус конкретного запуска смотрите в Actions.
 
 ## Документация
 
@@ -57,7 +70,7 @@ python3 -m compileall -q scripts
 - [Контракт и ограничения сканера](references/scanner.md)
 - [Критерии готовности](references/quality-gates.md)
 - [Анализ исходных проектов](references/upstream-review.md)
-- [Проверки версии 1.2.1](references/VERIFICATION.md)
+- [Проверки версии 2.0.0](references/VERIFICATION.md)
 - [Зафиксированные версии источников](references/upstream.json)
 
 ## Лицензия
@@ -73,4 +86,4 @@ python3 scripts/deep_audit.py /absolute/project --history --profile code --forma
 python3 scripts/deep_audit.py /absolute/project --url https://example.com/ --policy /policy.json
 ```
 
-Формат политики, импорт результатов и ограничения: [deep-audit.md](references/deep-audit.md). Сбор browser/axe, Lighthouse, ZAP, SBOM, OSV, Trivy и authorization evidence выполняется внешними инструментами; их живой запуск здесь не проверен. Проверено 57 автоматических тестов, включая реальные локальные Git и HTTP fixtures. Версия 1.2.1 отклоняет ошибочные и неполные отчёты и требует обязательные сценарии авторизации в политике.
+Формат политики, импорт результатов и ограничения: [deep-audit.md](references/deep-audit.md). Сбор browser/axe, Lighthouse, ZAP, SBOM, OSV, Trivy и authorization evidence выполняется внешними инструментами; их живой запуск здесь не проверен. Проверено 63 автоматических тестов, включая реальные локальные Git и HTTP fixtures. Версия 1.2.1 отклоняет ошибочные и неполные отчёты и требует обязательные сценарии авторизации в политике.

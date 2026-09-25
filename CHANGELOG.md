@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.0.0
+
+Added a whole-product readiness coordinator with ten-domain passports, deterministic coverage plans, source/artifact/environment binding, evidence expiry, manual versus automated provenance, issue retests and expiring exceptions. Bounded offline JSON input rejects duplicate keys; no project commands execute. Existing scanner CLI contracts remain available. Runtime collectors remain external and evidence authenticity is the trusted runner's responsibility.
+
 ## 1.2.1
 
 Reject failed and structurally incomplete dependency reports. Trivy imports require exit 0 (configure the producer accordingly); OSV exit 1 requires findings; SBOM generation requires exit 0. Authorization evidence rejects duplicate cases, binds its target, and requires a policy-owned list of mandatory cases. Missing coverage cannot pass.

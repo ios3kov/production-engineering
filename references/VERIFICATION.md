@@ -1,4 +1,10 @@
-# Verification — version 1.2.1
+# Verification — version 2.0.0
+
+Current 2.0 run: 2026-09-25, macOS/Python 3.14, base b498a05 plus working-tree changes. 63 unittest cases PASS (exit 0), compileall PASS, diff whitespace check PASS. New end-to-end CLI fixture covers ten domains; negative tests cover failures, missing/stale evidence, nonzero producer exit, identity mismatch, duplicates, issue expiry, retests and exclusions. Static self-audit exits 1 with the existing debug=True fixture false positive, no incomplete checks. Runtime infrastructure/load/recovery collectors were not executed.
+
+R1–R5 from production-2.md are implemented in readiness.py and covered by test_readiness.py. The evidence and policy owner remains responsible for collector authenticity, omitted findings and the adequacy of project-specific criteria. This release does not claim a production application has been audited.
+
+## Historical 1.2.1 verification
 
 Current run: macOS, Python unittest discovery — 57 tests PASS (exit 0); compileall and git diff --check PASS. Live Trivy/OSV/SBOM collectors were not run. No overall release certification is claimed.
 

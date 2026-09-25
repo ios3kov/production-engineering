@@ -1,5 +1,7 @@
 # Production Engineering — specification v1
 
+Version 2.0 extends this scanner contract with the whole-product coordinator defined in [production-2.md](production-2.md), requirements R1–R5. The scanner contracts below remain supported.
+
 ## Goal and users
 A reusable agent workflow plus a local Python 3.11+ audit CLI for project owners and coding agents. Preserve Spec Kit requirements → plan → tasks → implementation → verification. Integrate selected web-audit and vibe-audit checks as untrusted heuristic signals, with stricter execution and reporting.
 
