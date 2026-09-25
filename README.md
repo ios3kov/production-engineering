@@ -47,7 +47,7 @@ python3 -m unittest discover -s scripts/tests -v
 python3 -m compileall -q scripts
 ```
 
-30 регрессионных тестов. Автоматический CI описан в `.github/workflows/tests.yml`; статус конкретного запуска смотрите в Actions.
+50 регрессионных тестов. Автоматический CI описан в `.github/workflows/tests.yml`; статус конкретного запуска смотрите в Actions.
 
 ## Документация
 
