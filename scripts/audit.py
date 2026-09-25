@@ -15,8 +15,9 @@ import subprocess
 import sys
 import tempfile
 from urllib.parse import quote
+from supply_chain import scan_workflows
 
-VERSION = '1.1.0'
+VERSION = '1.2.0'
 HERE = Path(__file__).resolve().parent
 MAX_FILE = 2 * 1024 * 1024
 MAX_TOTAL = 64 * 1024 * 1024
@@ -45,11 +46,12 @@ def safe_text(value):
     return ''.join(c if c >= ' ' or c in '\n\t' else '?' for c in value)
 
 
-def finding(rule,path,line,severity,title,fix,source='core',confidence='heuristic'):
+def finding(rule,path,line,severity,title,fix,source='core',confidence='heuristic',standards=None):
     path=safe_text(path)
     identity=f'{rule}\0{path}\0{line}'
     return dict(rule=rule,path=path,line=line,severity=severity,title=safe_text(title),
                 remediation=fix,source=source,confidence=confidence,
+                standards=list(standards or []),
                 fingerprint=hashlib.sha256(identity.encode()).hexdigest()[:24],
                 evidence={'kind':'source_location','note':'Inspect locally; source text and values deliberately omitted.'})
 
@@ -145,7 +147,7 @@ def core_scan(root, checks=None):
                 continue
             for node in ast.walk(tree):
                 if isinstance(node,ast.Call) and isinstance(node.func,ast.Attribute) and node.func.attr in {'execute','executemany'} and node.args and isinstance(node.args[0],ast.JoinedStr):
-                    findings.append(finding('injection.sql_fstring',rel,node.lineno,'high','Interpolated string passed to database execution','Trace input origin and use bound query parameters.'))
+                    findings.append(finding('injection.sql_fstring',rel,node.lineno,'high','Interpolated string passed to database execution','Trace input origin and use bound query parameters.',standards=['v5.0.0-1.2.4']))
     return findings
 
 
@@ -160,8 +162,20 @@ def git_check(root):
             if bn.startswith('.env') and not bn.endswith(('.example','.sample','.template','.dist')):
                 found.append(finding('secret.tracked_env',name,0,'high','Environment file tracked by Git','Inspect locally; remove sensitive values from version control and rotate exposed credentials.',confidence='observed'))
         return found,{'id':'git.index','status':'completed'}
-    except (OSError,ValueError,subprocess.SubprocessError):
+    except (OSError,ValueError,RuntimeError,subprocess.SubprocessError):
         return [],{'id':'git.index','status':'error','reason':'Git index unavailable.'}
+
+
+def git_identity(root):
+    if not (root/'.git').exists():return {'commit':None,'dirty':None}
+    try:
+        base=['git','-c','core.fsmonitor=false','-c','core.hooksPath=/dev/null','-C',str(root)]
+        head=subprocess.run([*base,'rev-parse','HEAD'],capture_output=True,timeout=20,check=True).stdout.decode('ascii').strip()
+        if not re.fullmatch(r'[0-9a-f]{40,64}',head):raise ValueError()
+        status=subprocess.run([*base,'status','--porcelain=v1','--untracked-files=normal'],capture_output=True,timeout=20,check=True)
+        return {'commit':head,'dirty':bool(status.stdout)}
+    except (OSError,ValueError,UnicodeError,subprocess.SubprocessError):
+        return {'commit':None,'dirty':None}
 
 
 def web_checks(root):
@@ -195,8 +209,9 @@ def vibe_checks(root):
         for row in rows:
             where=row['where']; path,sep,line=where.rpartition(':')
             if not sep or not line.isdigit():path,line=where,0
+            standards={'sql_fstring':['v5.0.0-1.2.4'],'eval_use':['v5.0.0-1.3.2']}.get(row['id'],[])
             result.append(finding('vibe.'+row['id'],path,int(line),'medium' if row['severity']!='info' else 'info',
-                row['title'],'Inspect context and reproduce before changing code.',source='vibe-audit'))
+                row['title'],'Inspect context and reproduce before changing code.',source='vibe-audit',standards=standards))
         return result,checks
     except (OSError,ValueError,KeyError,TypeError,RuntimeError,subprocess.SubprocessError):
         return [],[{'id':'vibe.static','status':'error','reason':'Adapter failed or timed out.'}]
@@ -251,6 +266,7 @@ def scan(root,web=True,npm=False):
         findings+=core_scan(snapshot,checks);checks.append({'id':'core.static','status':'completed'})
         f,c=git_check(root);findings+=f;checks.append(c)
         f,c=vibe_checks(snapshot);findings+=f;checks+=c
+        f,c=scan_workflows(snapshot,finding);findings+=f;checks.append(c)
         if web:
             f,c=web_checks(snapshot);findings+=f;checks+=c
         if npm:
@@ -259,6 +275,7 @@ def scan(root,web=True,npm=False):
     rank={'critical':0,'high':1,'medium':2,'low':3,'info':4}
     findings=sorted(unique.values(),key=lambda f:(rank[f['severity']],f['path'],f['line'],f['rule']))
     report={'schema_version':1,'tool_version':VERSION,'time_utc':dt.datetime.now(dt.timezone.utc).isoformat(),
+            'source_identity':git_identity(root),
             'profile':'web' if web else 'code','release_readiness':'not_assessed','inventory':inv,'checks':checks,'findings':findings,
             'not_assessed':['Git history','runtime headers/cookies','browser flows and accessibility','authorization and E2EE','performance under load','backup restore and rollback','legal applicability']+([] if npm else ['dependency vulnerabilities']),
             'scope_note':'Generated/dependency directories and unsupported file types excluded. No finding is a safety guarantee.'}
@@ -275,7 +292,7 @@ def render(report,fmt):
         for f in report['findings']:
             row={'ruleId':f['rule'],'level':{'critical':'error','high':'error','medium':'warning','low':'warning','info':'note'}[f['severity']],
                  'message':{'text':f['title']+' — '+f['remediation']},'partialFingerprints':{'productionEngineering/v1':f['fingerprint']},
-                 'properties':{'confidence':f['confidence'],'source':f['source']}}
+                 'properties':{'confidence':f['confidence'],'source':f['source'],'standards':f.get('standards',[])}}
             if f['path']:
                 location={'artifactLocation':{'uri':quote(f['path'],safe='/')}}
                 if f['line']>0:location['region']={'startLine':f['line']}
@@ -294,7 +311,7 @@ def render(report,fmt):
         lines += ['', '## Selected policy', '', 'Required: '+esc(', '.join(report['gate']['required'])), 'Missing/incomplete: '+esc(', '.join(report['gate']['missing_or_incomplete']) or 'none')]
     lines += ['','## Findings','']
     for f in report['findings']:
-        lines += [f"### {f['severity']}: {esc(f['title'])}",f"- Rule: {esc(f['rule'])}; confidence: {f['confidence']}",f"- Location: {esc(f['path'])}:{f['line']}",f"- Action: {esc(f['remediation'])}",f"- Fingerprint: {f['fingerprint']}",'']
+        lines += [f"### {f['severity']}: {esc(f['title'])}",f"- Rule: {esc(f['rule'])}; confidence: {f['confidence']}",f"- Standards: {esc(', '.join(f.get('standards',[])) or 'none')}",f"- Location: {esc(f['path'])}:{f['line']}",f"- Action: {esc(f['remediation'])}",f"- Fingerprint: {f['fingerprint']}",'']
     lines+=['## Not assessed','']+['- '+s for s in report['not_assessed']]
     if report['inventory']['omissions']:lines+=['','## Omitted inputs','']+['- '+esc(o['path'])+': '+o['reason'] for o in report['inventory']['omissions']]
     return '\n'.join(lines)+'\n'

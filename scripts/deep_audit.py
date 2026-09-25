@@ -28,9 +28,11 @@ def source_scope(root):
     return inv['scope_digest']
 
 
-def import_evidence(bundle,scope_digest,target_url=''):
-    if not isinstance(bundle,dict) or bundle.get('schema_version')!=1 or bundle.get('scope_digest')!=scope_digest:
+def import_evidence(bundle,scope_digest,target_url='',source_identity=None):
+    if not isinstance(bundle,dict) or bundle.get('schema_version')!=2 or bundle.get('scope_digest')!=scope_digest:
         raise ValueError('Evidence does not match current source scope')
+    if not isinstance(source_identity,dict) or bundle.get('source_identity')!=source_identity:
+        raise ValueError('Evidence does not match current Git identity')
     timestamp=dt.datetime.fromisoformat(bundle['created_at'])
     if timestamp.tzinfo is None:raise ValueError('Evidence timestamp must include timezone')
     age=(dt.datetime.now(dt.timezone.utc)-timestamp).total_seconds()
@@ -43,7 +45,7 @@ def import_evidence(bundle,scope_digest,target_url=''):
         if tool in tools:raise ValueError('Duplicate tool report')
         tools.add(tool)
         f,c=parse_tool_report(tool,item['data'],item['returncode'])
-        if tool!='semgrep':
+        if tool in {'browser','lighthouse','zap'}:
             if not target_url or bundle.get('target_url')!=target_url:raise ValueError('Evidence target mismatch')
             origin=urlsplit(target_url)
             # Validate every raw report URL, even when there are no findings.
@@ -92,7 +94,7 @@ def deep_scan(root,history=False,url='',allow_loopback=False,evidence=None,polic
             attach([],[{'id':'semgrep','status':'error','reason':'Semgrep unavailable, failed, or incomplete.'}])
     if evidence:
         try:
-            f,c=import_evidence(load_json(Path(evidence)),scope,url);attach(f,c)
+            f,c=import_evidence(load_json(Path(evidence)),scope,url,report['source_identity']);attach(f,c)
         except (OSError,ValueError,KeyError,TypeError,RuntimeError):
             attach([],[{'id':'external_evidence','status':'error','reason':'External evidence invalid, stale, duplicate or mismatched.'}])
     try:

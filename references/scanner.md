@@ -4,7 +4,9 @@ Run `python3 scripts/audit.py ROOT --profile web|code --format json|markdown|sar
 
 Python 3.11+; no third-party packages for the scanner. Offline by default. The `code` profile runs credential rules, Python AST interpolated-query checks, modern Compose default-password detection, Git index inspection and selected vibe checks. `web` adds static accessibility, SEO, consent, configured headers and legal-page discovery from web-audit. Legal pages are signals to review, not legal requirements inferred from a generic website.
 
-`--npm-audit` explicitly enables dependency metadata transfer to the public npm registry. Runs npm against temporary copies of nested package-lock.json files with an inert package.json, empty npm config, fresh cache and lifecycle scripts disabled. Does not install or fix dependencies. Missing lockfiles/tools, registry failures and malformed audit output produce INCOMPLETE. pnpm/yarn/Python/Go/Rust/Ruby/PHP dependency auditing is an agent-run gate using the actual project's tools, not implemented in this scanner. Never substitute a host environment audit for project dependencies.
+The offline profiles also inspect GitHub Actions workflow text for privileged pull-request triggers, broad write permissions, mutable third-party action references and retained checkout credentials. These are review candidates, not proof of exploitability. Exact verified mappings may include versioned ASVS or NIST SSDF identifiers; an identifier records traceability, not compliance.
+
+`--npm-audit` explicitly enables dependency metadata transfer to the public npm registry. Runs npm against temporary copies of nested package-lock.json files with an inert package.json, empty npm config, fresh cache and lifecycle scripts disabled. Does not install or fix dependencies. Missing lockfiles/tools, registry failures and malformed audit output produce INCOMPLETE. pnpm/yarn/Python/Go/Rust/Ruby/PHP dependency auditing is an agent-run gate using the actual project's tools, not implemented in this scanner. Deep audit can import strict CycloneDX, OSV and Trivy evidence. Never substitute a host environment audit for project dependencies.
 
 ## Execution and output
 
@@ -12,7 +14,7 @@ Python 3.11+; no third-party packages for the scanner. Offline by default. The `
 - 1: findings to inspect (including informational review items).
 - 2: incomplete selected checks/input, tool error, invalid root or output failure.
 
-All formats share this exit policy. SARIF executionSuccessful=false when selected checks are incomplete. JSON includes schema_version, tool_version, time_utc, profile, checks, inventory, findings, verdict, exit_code, not_assessed, and release_readiness=not_assessed. Findings include rule, relative path, line, severity, confidence, source, remediation, evidence metadata and fingerprint. Credentials and source snippets are not output. Fingerprints use rule/path/line; line changes change fingerprints. They are for identical-location deduplication, not semantic cross-revision suppression.
+All formats share this exit policy. SARIF executionSuccessful=false when selected checks are incomplete. JSON includes schema_version, tool_version, time_utc, source_identity, profile, checks, inventory, findings, verdict, exit_code, not_assessed, and release_readiness=not_assessed. `source_identity` records the Git commit and dirty state when available. Findings include rule, relative path, line, severity, confidence, source, standards, remediation, evidence metadata and fingerprint. Credentials and source snippets are not output. Fingerprints use rule/path/line; line changes change fingerprints. They are for identical-location deduplication, not semantic cross-revision suppression.
 
 ## Coverage and boundaries
 

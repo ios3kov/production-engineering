@@ -1,8 +1,12 @@
 # Changelog
 
+## 1.2.0 — 2026-09-25
+
+Added offline GitHub Actions supply-chain checks, Git commit/dirty-state report binding, versioned ASVS references, and strict CycloneDX, OSV, Trivy and authorization-matrix evidence adapters. Evidence schema v2 now requires matching source identity. Added regression coverage for the new contracts; 55 tests pass.
+
 ## 1.1.0 — 2026-09-25
 
-Added bounded Git-history secret scanning, explicit live HTTP checks, strict imports for browser/axe, Lighthouse, Semgrep and ZAP, and a required-check policy gate. Added source-scope and evidence-age validation. Browser collection remains external; optional engine live execution is not verified. 50 regression tests pass.
+Added bounded Git-history secret scanning, explicit live HTTP checks, strict imports for browser/axe, Lighthouse, Semgrep and ZAP, and a required-check policy gate. Added source-scope and evidence-age validation. Browser collection remains external; optional engine live execution is not verified. 51 regression tests pass, including graceful handling of a failed Git index command.
 
 ## 1.0.0 — 2026-09-25
 

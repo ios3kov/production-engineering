@@ -46,15 +46,31 @@ class DeepTests(unittest.TestCase):
         for url in ['file:///etc/passwd','http://u:p@example.com/','https://example.com/?token=secret','http://127.0.0.1/','http://10.0.0.1/']:
             with self.subTest(url=url),self.assertRaises(ValueError):validate_url(url)
     def test_stale_and_mismatched_evidence(self):
-        bundle={'schema_version':1,'scope_digest':'abc','created_at':(dt.datetime.now(dt.timezone.utc)-dt.timedelta(days=2)).isoformat(),'reports':[]}
-        with self.assertRaises(ValueError):import_evidence(bundle,'abc')
-        with self.assertRaises(ValueError):import_evidence(bundle,'different')
+        identity={'commit':None,'dirty':None}
+        bundle={'schema_version':2,'scope_digest':'abc','source_identity':identity,'created_at':(dt.datetime.now(dt.timezone.utc)-dt.timedelta(days=2)).isoformat(),'reports':[]}
+        with self.assertRaises(ValueError):import_evidence(bundle,'abc',source_identity=identity)
+        with self.assertRaises(ValueError):import_evidence(bundle,'different',source_identity=identity)
     def test_valid_evidence_and_duplicate_rejection(self):
         row={'tool':'semgrep','returncode':0,'data':{'results':[],'errors':[],'paths':{'scanned':['app.py']}}}
-        bundle={'schema_version':1,'scope_digest':'abc','created_at':dt.datetime.now(dt.timezone.utc).isoformat(),'reports':[row]}
-        f,c=import_evidence(bundle,'abc');self.assertEqual(c[0]['status'],'completed')
+        identity={'commit':'a'*40,'dirty':False}
+        bundle={'schema_version':2,'scope_digest':'abc','source_identity':identity,'created_at':dt.datetime.now(dt.timezone.utc).isoformat(),'reports':[row]}
+        f,c=import_evidence(bundle,'abc',source_identity=identity);self.assertEqual(c[0]['status'],'completed')
         bundle['reports'].append(row)
-        with self.assertRaises(ValueError):import_evidence(bundle,'abc')
+        with self.assertRaises(ValueError):import_evidence(bundle,'abc',source_identity=identity)
+    def test_evidence_requires_matching_git_identity(self):
+        identity={'commit':'a'*40,'dirty':False}
+        bundle={'schema_version':2,'scope_digest':'abc','source_identity':identity,'created_at':dt.datetime.now(dt.timezone.utc).isoformat(),
+                'reports':[{'tool':'semgrep','returncode':0,'data':{'results':[],'errors':[],'paths':{'scanned':['app.py']}}}]}
+        with self.assertRaises(ValueError):import_evidence(bundle,'abc',source_identity={'commit':'b'*40,'dirty':False})
+    def test_sbom_trivy_osv_and_authz_adapters(self):
+        sbom={'bomFormat':'CycloneDX','specVersion':'1.6','components':[{'name':'demo','version':'1.0'}]}
+        f,c=parse_tool_report('sbom',sbom,0);self.assertEqual(c[0]['status'],'completed');self.assertTrue(f)
+        trivy={'SchemaVersion':2,'Results':[{'Vulnerabilities':[{'VulnerabilityID':'CVE-2026-0001','Severity':'HIGH'}]}]}
+        f,c=parse_tool_report('trivy',trivy,0);self.assertEqual(f[0]['severity'],'high')
+        osv={'results':[{'packages':[{'vulnerabilities':[{'id':'GHSA-abcd-1234-5678','database_specific':{'severity':'HIGH'}}]}]}]}
+        f,c=parse_tool_report('osv',osv,0);self.assertEqual(c[0]['vulnerabilities'],1)
+        authz={'cases':[{'id':'user-read-other','actor':'user-a','action':'read','resource':'user-b/item','expected':'deny','actual':'allow'}]}
+        f,c=parse_tool_report('authz',authz,0);self.assertEqual(f[0]['severity'],'high')
     def test_gate_visible_in_all_formats(self):
         with tempfile.TemporaryDirectory() as tmp, tempfile.TemporaryDirectory() as cfg:
             Path(tmp,'app.py').write_text('print("hello")')

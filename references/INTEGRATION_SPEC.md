@@ -1,4 +1,4 @@
-# Deep audit integration 1.1
+# Deep audit integration 1.2
 
 Objective: extend the existing Spec Kit workflow with executable history and HTTP checks, browser evidence import, validated specialist-tool results and a strict CI gate. Keep one normalized report and preserve fast offline scanning.
 
@@ -9,6 +9,9 @@ Requirements:
 - D4: browser collection remains an external runner responsibility. Import sanitized explicit-page evidence; blocked requests mark coverage incomplete. No bundled browser launcher in 1.1.
 - D5: CI policy lists mandatory checks. Any missing, error or skipped mandatory check blocks; FAIL findings meeting policy threshold block. Report distinguishes static audit from selected gate completion. Manual evidence is explicit owner attestation, not automatic verification.
 - D6: regression tests: deleted Git secret, shallow Git, cross-origin redirect, private target, repeated cookies, body truncation, tool schema/error handling, gate skipped/missing/stale/failed inputs. Real local HTTP fixture and Git repositories; browser and specialist live runs only where available.
+- D7: record Git commit and dirty state; evidence schema v2 must match both this identity and the bounded source digest.
+- D8: inspect GitHub Actions offline for privileged triggers, broad write permissions, mutable action references and retained checkout credentials.
+- D9: import CycloneDX, OSV, Trivy and explicit authorization matrices with strict schemas. Dependency or authorization findings retain no package secrets, request bodies or response data.
 
 Architecture: existing audit.py → deep_audit.py coordinator → history.py + live_http.py + external_reports.py → normalized existing JSON/Markdown/SARIF; an external authorized browser runner produces browser evidence; release gate consumes the unified report and policy. No source mutation by scan. All network/deep actions explicit opt-in.
 

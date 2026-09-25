@@ -81,6 +81,57 @@ def _parse_tool_report(tool,data,returncode):
                 risk=str(alert['riskcode']);require(risk in {'0','1','2','3'})
                 add('alert.'+safe_rule(str(alert['pluginid'])),{'0':'info','1':'low','2':'medium','3':'high'}[risk],'ZAP passive alert',url=url)
         checks=[{'id':'zap','status':'completed','note':'Imported passive report; report authenticity belongs to the generating CI job.'}]
+    elif tool=='trivy':
+        require(type(data.get('SchemaVersion')) is int and isinstance(data.get('Results'),list) and data['Results'])
+        count=0
+        for result in data['Results']:
+            vulnerabilities=result.get('Vulnerabilities') or []
+            require(isinstance(vulnerabilities,list))
+            for vulnerability in vulnerabilities:
+                severity=str(vulnerability.get('Severity','')).upper()
+                require(severity in {'UNKNOWN','LOW','MEDIUM','HIGH','CRITICAL'})
+                rule=safe_rule(str(vulnerability['VulnerabilityID']))
+                add(rule,{'UNKNOWN':'medium','LOW':'low','MEDIUM':'medium','HIGH':'high','CRITICAL':'critical'}[severity],
+                    'Trivy dependency or image vulnerability')
+                count+=1
+        checks=[{'id':'trivy','status':'completed','results_scanned':len(data['Results']),'vulnerabilities':count}]
+    elif tool=='osv':
+        require(isinstance(data.get('results'),list))
+        packages=0;count=0
+        for result in data['results']:
+            rows=result.get('packages');require(isinstance(rows,list))
+            packages+=len(rows)
+            for package in rows:
+                vulnerabilities=package.get('vulnerabilities') or []
+                require(isinstance(vulnerabilities,list))
+                for vulnerability in vulnerabilities:
+                    severity=str(vulnerability.get('database_specific',{}).get('severity','MODERATE')).upper()
+                    mapped={'LOW':'low','MODERATE':'medium','MEDIUM':'medium','HIGH':'high','CRITICAL':'critical'}.get(severity,'medium')
+                    add(safe_rule(str(vulnerability['id'])),mapped,'OSV dependency vulnerability')
+                    count+=1
+        require(packages>0)
+        checks=[{'id':'osv','status':'completed','packages_scanned':packages,'vulnerabilities':count}]
+    elif tool=='sbom':
+        require(data.get('bomFormat')=='CycloneDX' and isinstance(data.get('specVersion'),str))
+        components=data.get('components');require(isinstance(components,list) and components)
+        missing_hash=sum(not isinstance(c.get('hashes'),list) or not c['hashes'] for c in components)
+        missing_license=sum(not c.get('licenses') for c in components)
+        missing_id=sum(not (c.get('purl') or c.get('bom-ref')) for c in components)
+        if missing_hash:add('missing_hash','low',f'{missing_hash} SBOM components lack hashes')
+        if missing_license:add('missing_license','low',f'{missing_license} SBOM components lack license data')
+        if missing_id:add('missing_identifier','medium',f'{missing_id} SBOM components lack stable identifiers')
+        checks=[{'id':'sbom','status':'completed','format':'CycloneDX','components':len(components)}]
+    elif tool=='authz':
+        require(returncode==0 and isinstance(data.get('cases'),list) and data['cases'])
+        incomplete=False
+        for case in data['cases']:
+            require(all(isinstance(case.get(k),str) and case[k] for k in ['id','actor','action','resource','expected','actual']))
+            require(case['expected'] in {'allow','deny'} and case['actual'] in {'allow','deny','error'})
+            if case['actual']=='error':incomplete=True
+            elif case['actual']!=case['expected']:
+                add('case.'+safe_rule(case['id']),'high','Authorization matrix result differs from policy')
+        checks=[{'id':'authz','status':'error' if incomplete else 'completed','cases':len(data['cases']),
+                 'reason':'One or more authorization cases could not execute.' if incomplete else 'Explicit authorization cases assessed.'}]
     else:raise ValueError('Unsupported external tool')
     return findings,checks
 

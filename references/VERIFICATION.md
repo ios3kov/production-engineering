@@ -1,8 +1,8 @@
-# Verification — version 1.0.0
+# Verification — version 1.2.0
 
-Verified 2026-09-25 in the current Linux/Python 3.12 environment.
+Originally verified 2026-09-25 on Linux/Python 3.12. Version 1.2.0 was verified on macOS/Python 3.14 against base revision `8c4297aad5a57c5385a3878fe59ba910e955149b` plus the documented working-tree changes.
 
-- PASS: 30 unittest cases, including credentials in docs/examples/tests, no secret output, skipped symlinks, size/total bounds, malformed tool output, timeouts, Python AST queries, npm failure handling, nested npm projects, Git tracked env, SARIF URI escaping, nonzero JSON exits and safe output paths.
+- PASS: 55 unittest cases, including credentials in docs/examples/tests, bounded inputs, malformed tool output, Git identity/failure handling, GitHub Actions findings, versioned ASVS metadata, strict SBOM/OSV/Trivy/authz adapters, SARIF URI escaping, nonzero JSON exits and safe output paths.
 - PASS: skill structure validator.
 - PASS: compilation of all Python sources. No separate lint/type-check configuration or packaging build is defined; these are not claimed executed.
 - PASS: real npm audit invocation using a disposable valid empty lockfile; tool completed. This proves invocation/configuration, not advisory detection against a production dependency tree. Positive advisory parsing has a controlled regression test.

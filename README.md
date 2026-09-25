@@ -47,7 +47,7 @@ python3 -m unittest discover -s scripts/tests -v
 python3 -m compileall -q scripts
 ```
 
-50 регрессионных тестов. Автоматический CI описан в `.github/workflows/tests.yml`; статус конкретного запуска смотрите в Actions.
+55 регрессионных тестов. Автоматический CI описан в `.github/workflows/tests.yml`; статус конкретного запуска смотрите в Actions.
 
 ## Документация
 
@@ -57,20 +57,20 @@ python3 -m compileall -q scripts
 - [Контракт и ограничения сканера](references/scanner.md)
 - [Критерии готовности](references/quality-gates.md)
 - [Анализ исходных проектов](references/upstream-review.md)
-- [Проверки версии 1.0.0](references/VERIFICATION.md)
+- [Проверки версии 1.2.0](references/VERIFICATION.md)
 - [Зафиксированные версии источников](references/upstream.json)
 
 ## Лицензия
 
 MIT. Исходные уведомления об авторских правах сохранены в `references/upstream/*/LICENSE`; см. [NOTICE](NOTICE). Проверки эвристические: инструмент не является пентестом, юридическим заключением или сертификатом безопасности.
 
-## Глубокая проверка — 1.1
+## Глубокая проверка — 1.2
 
-Добавлены поиск секретов в истории Git, проверки HTTP/TLS и cookies, импорт отчётов browser/axe, Lighthouse, Semgrep и ZAP, обязательные проверки перед релизом. Пропущенная или ошибочная проверка блокирует выбранную политику.
+Добавлены поиск секретов в истории Git, аудит GitHub Actions, проверки HTTP/TLS и cookies, привязка evidence к commit/dirty-state, ASVS-ссылки и строгий импорт browser/axe, Lighthouse, Semgrep, ZAP, CycloneDX, OSV, Trivy и матриц авторизации. Пропущенная или ошибочная проверка блокирует выбранную политику.
 
 ```bash
 python3 scripts/deep_audit.py /absolute/project --history --profile code --format json
 python3 scripts/deep_audit.py /absolute/project --url https://example.com/ --policy /policy.json
 ```
 
-Формат политики, импорт результатов и ограничения: [deep-audit.md](references/deep-audit.md). Сбор browser/axe, Lighthouse и ZAP выполняется внешними инструментами; их живой запуск здесь не проверен. Проверено 50 автоматических тестов, включая реальные локальные Git и HTTP fixtures.
+Формат политики, импорт результатов и ограничения: [deep-audit.md](references/deep-audit.md). Сбор browser/axe, Lighthouse, ZAP, SBOM, OSV, Trivy и authorization evidence выполняется внешними инструментами; их живой запуск здесь не проверен. Проверено 55 автоматических тестов, включая реальные локальные Git и HTTP fixtures.

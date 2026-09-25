@@ -43,7 +43,7 @@ Do not expose literal credentials to chat, reports or issue trackers. For a cred
 
 ## Run deeper checks when applicable
 
-Read [deep-audit.md](references/deep-audit.md) for history, live HTTP, specialist evidence and CI policy. Use `scripts/deep_audit.py` with explicit opt-ins. Keep browser/axe, Lighthouse and ZAP execution in an authorized external runner; this version imports their results and does not install or launch those tools. Semgrep can run with a local rules file. Required missing checks block the selected policy; successful policy evaluation does not certify overall readiness.
+Read [deep-audit.md](references/deep-audit.md) for history, live HTTP, specialist evidence and CI policy. Use `scripts/deep_audit.py` with explicit opt-ins. Keep browser/axe, Lighthouse, ZAP, SBOM, OSV, Trivy and authorization-matrix execution in an authorized external runner; this version strictly imports their results and does not install or launch those tools. Semgrep can run with a local rules file. Evidence schema v2 binds the source digest, Git commit and dirty state. Required missing checks block the selected policy; successful policy evaluation does not certify overall readiness.
 
 ## Validate and repair findings
 

@@ -93,7 +93,8 @@ class ExtendedAuditTests(unittest.TestCase):
     def test_python_multiline_query(self):
         self.put('db.py','cursor.execute(\n f"SELECT * FROM users WHERE id={user_input}"\n)')
         r=audit.scan(self.root,web=False)
-        self.assertTrue(any(f['rule']=='injection.sql_fstring' for f in r['findings']))
+        finding=next(f for f in r['findings'] if f['rule']=='injection.sql_fstring')
+        self.assertIn('v5.0.0-1.2.4',finding['standards'])
     def test_bound_query_not_flagged(self):
         self.put('db.py','cursor.execute("SELECT * FROM users WHERE id=?", (user_input,))')
         r=audit.scan(self.root,web=False)
@@ -130,6 +131,28 @@ class ExtendedAuditTests(unittest.TestCase):
         subprocess.run(['git','-C',str(self.root),'add','.env'],check=True)
         r=audit.scan(self.root,web=False)
         self.assertTrue(any(f['rule']=='secret.tracked_env' for f in r['findings']))
+    def test_git_command_failure_is_incomplete(self):
+        (self.root/'.git').mkdir()
+        self.put('main.py','print(1)')
+        failed=subprocess.CompletedProcess(['git'],2,stdout=b'',stderr=b'failure')
+        with patch.object(audit.subprocess,'run',return_value=failed):
+            r=audit.scan(self.root,web=False)
+        self.assertEqual(audit.exit_code(r),2)
+        self.assertEqual(next(c for c in r['checks'] if c['id']=='git.index')['status'],'error')
+    def test_source_identity_records_commit_and_dirty_state(self):
+        subprocess.run(['git','init','-q',str(self.root)],check=True)
+        subprocess.run(['git','-C',str(self.root),'-c','user.name=Fixture','-c','user.email=x@example.test','commit','--allow-empty','-qm','one'],check=True)
+        clean=audit.scan(self.root,web=False)['source_identity']
+        self.assertRegex(clean['commit'],r'^[0-9a-f]{40}$');self.assertFalse(clean['dirty'])
+        self.put('main.py','print(1)')
+        self.assertTrue(audit.scan(self.root,web=False)['source_identity']['dirty'])
+    def test_supply_chain_workflow_findings(self):
+        self.put('.github/workflows/release.yml','''on:\n  pull_request_target:\npermissions: write-all\njobs:\n  release:\n    steps:\n      - uses: actions/checkout@v4\n      - run: echo "${{ secrets.TOKEN }}"\n''')
+        r=audit.scan(self.root,web=False)
+        rules={f['rule'] for f in r['findings']}
+        self.assertTrue({'supply_chain.pull_request_target','supply_chain.write_all','supply_chain.unpinned_action'} <= rules)
+        self.assertTrue(any(f['standards'] for f in r['findings'] if f['rule'].startswith('supply_chain.')))
+        self.assertEqual(next(c for c in r['checks'] if c['id']=='supply_chain.github_actions')['status'],'completed')
     def test_total_budget_marks_incomplete(self):
         self.put('a.py','print(123)')
         self.put('b.py','print(456)')
