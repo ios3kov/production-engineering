@@ -1,4 +1,8 @@
-# Verification — version 1.2.0
+# Verification — version 1.2.1
+
+Current run: macOS, Python unittest discovery — 57 tests PASS (exit 0); compileall and git diff --check PASS. Live Trivy/OSV/SBOM collectors were not run. No overall release certification is claimed.
+
+1.2.1 regression scope: failed dependency-tool exits, incomplete package/component/target records, duplicate authorization cases, missing policy cases and complete policy coverage. Earlier verification entries below describe the 1.2.0 baseline, not newly executed specialist tools.
 
 Originally verified 2026-09-25 on Linux/Python 3.12. Version 1.2.0 was verified on macOS/Python 3.14 against base revision `8c4297aad5a57c5385a3878fe59ba910e955149b` plus the documented working-tree changes.
 

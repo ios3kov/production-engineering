@@ -47,7 +47,7 @@ python3 -m unittest discover -s scripts/tests -v
 python3 -m compileall -q scripts
 ```
 
-55 регрессионных тестов. Автоматический CI описан в `.github/workflows/tests.yml`; статус конкретного запуска смотрите в Actions.
+57 регрессионных тестов. Автоматический CI описан в `.github/workflows/tests.yml`; статус конкретного запуска смотрите в Actions.
 
 ## Документация
 
@@ -57,7 +57,7 @@ python3 -m compileall -q scripts
 - [Контракт и ограничения сканера](references/scanner.md)
 - [Критерии готовности](references/quality-gates.md)
 - [Анализ исходных проектов](references/upstream-review.md)
-- [Проверки версии 1.2.0](references/VERIFICATION.md)
+- [Проверки версии 1.2.1](references/VERIFICATION.md)
 - [Зафиксированные версии источников](references/upstream.json)
 
 ## Лицензия
@@ -73,4 +73,4 @@ python3 scripts/deep_audit.py /absolute/project --history --profile code --forma
 python3 scripts/deep_audit.py /absolute/project --url https://example.com/ --policy /policy.json
 ```
 
-Формат политики, импорт результатов и ограничения: [deep-audit.md](references/deep-audit.md). Сбор browser/axe, Lighthouse, ZAP, SBOM, OSV, Trivy и authorization evidence выполняется внешними инструментами; их живой запуск здесь не проверен. Проверено 55 автоматических тестов, включая реальные локальные Git и HTTP fixtures.
+Формат политики, импорт результатов и ограничения: [deep-audit.md](references/deep-audit.md). Сбор browser/axe, Lighthouse, ZAP, SBOM, OSV, Trivy и authorization evidence выполняется внешними инструментами; их живой запуск здесь не проверен. Проверено 57 автоматических тестов, включая реальные локальные Git и HTTP fixtures. Версия 1.2.1 отклоняет ошибочные и неполные отчёты и требует обязательные сценарии авторизации в политике.

@@ -17,7 +17,7 @@ import tempfile
 from urllib.parse import quote
 from supply_chain import scan_workflows
 
-VERSION = '1.2.0'
+VERSION = '1.2.1'
 HERE = Path(__file__).resolve().parent
 MAX_FILE = 2 * 1024 * 1024
 MAX_TOTAL = 64 * 1024 * 1024

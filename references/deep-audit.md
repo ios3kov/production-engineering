@@ -1,5 +1,11 @@
 # Deep audit 1.2
 
+### 1.2.1 evidence hardening
+
+Trivy producers must use exit code 0 on a completed scan; nonzero exits are rejected even with JSON output. Imported results must identify Target, Class (os-pkgs or lang-pkgs), and Type. This adapter covers vulnerability scans only. OSV permits exit 0 or exit 1 with findings and requires package name/version/ecosystem. SBOM generation must exit 0 and components must identify type/name/version. Explicit malformed/null vulnerability arrays are rejected. These are bounded structural checks, not full upstream schema validation or proof of coverage.
+
+Authorization evidence requires matching bundle target_url and the requested --url. Every case ID must be unique. A policy selecting or importing authz must define a nonempty unique authz_required_cases list, e.g. {"required":["authz"],"authz_required_cases":["own-read","other-read-denied","anonymous-denied"]}. Missing cases make the gate incomplete; importing authz without a policy is incomplete. The project owner defines this list from the application's access model. Case identities bind coverage but do not authenticate the collector or prove that its expectations are correct.
+
 Run Python 3.11+ from the installed skill. Default static scanning stays offline.
 
 ```bash

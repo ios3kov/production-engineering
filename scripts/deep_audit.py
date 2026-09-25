@@ -45,6 +45,8 @@ def import_evidence(bundle,scope_digest,target_url='',source_identity=None):
         if tool in tools:raise ValueError('Duplicate tool report')
         tools.add(tool)
         f,c=parse_tool_report(tool,item['data'],item['returncode'])
+        if tool=='authz':
+            if not target_url or bundle.get('target_url')!=target_url:raise ValueError('Authorization evidence target mismatch')
         if tool in {'browser','lighthouse','zap'}:
             if not target_url or bundle.get('target_url')!=target_url:raise ValueError('Evidence target mismatch')
             origin=urlsplit(target_url)
@@ -108,6 +110,8 @@ def deep_scan(root,history=False,url='',allow_loopback=False,evidence=None,polic
         report['gate']=evaluate_gate(report,load_json(Path(policy)))
         report['exit_code']=report['gate']['exit_code'];report['verdict']=report['gate']['verdict']
     else:
+        if any(c['id']=='authz' for c in report['checks']):
+            report['checks'].append({'id':'authz.coverage','status':'error','reason':'Authorization coverage requires a policy with authz_required_cases.'})
         report['exit_code']=audit.exit_code(report)
         report['verdict']={0:'no_findings_in_scanned_scope',1:'review_required',2:'incomplete'}[report['exit_code']]
     completed={c['id'] for c in report['checks'] if c['status']=='completed'}

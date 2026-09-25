@@ -63,14 +63,30 @@ class DeepTests(unittest.TestCase):
                 'reports':[{'tool':'semgrep','returncode':0,'data':{'results':[],'errors':[],'paths':{'scanned':['app.py']}}}]}
         with self.assertRaises(ValueError):import_evidence(bundle,'abc',source_identity={'commit':'b'*40,'dirty':False})
     def test_sbom_trivy_osv_and_authz_adapters(self):
-        sbom={'bomFormat':'CycloneDX','specVersion':'1.6','components':[{'name':'demo','version':'1.0'}]}
+        sbom={'bomFormat':'CycloneDX','specVersion':'1.6','components':[{'type':'library','name':'demo','version':'1.0'}]}
         f,c=parse_tool_report('sbom',sbom,0);self.assertEqual(c[0]['status'],'completed');self.assertTrue(f)
-        trivy={'SchemaVersion':2,'Results':[{'Vulnerabilities':[{'VulnerabilityID':'CVE-2026-0001','Severity':'HIGH'}]}]}
+        trivy={'SchemaVersion':2,'Results':[{'Target':'image','Class':'os-pkgs','Type':'alpine','Vulnerabilities':[{'VulnerabilityID':'CVE-2026-0001','Severity':'HIGH'}]}]}
         f,c=parse_tool_report('trivy',trivy,0);self.assertEqual(f[0]['severity'],'high')
-        osv={'results':[{'packages':[{'vulnerabilities':[{'id':'GHSA-abcd-1234-5678','database_specific':{'severity':'HIGH'}}]}]}]}
+        osv={'results':[{'packages':[{'package':{'name':'demo','version':'1','ecosystem':'PyPI'},'vulnerabilities':[{'id':'GHSA-abcd-1234-5678','database_specific':{'severity':'HIGH'}}]}]}]}
         f,c=parse_tool_report('osv',osv,0);self.assertEqual(c[0]['vulnerabilities'],1)
         authz={'cases':[{'id':'user-read-other','actor':'user-a','action':'read','resource':'user-b/item','expected':'deny','actual':'allow'}]}
         f,c=parse_tool_report('authz',authz,0);self.assertEqual(f[0]['severity'],'high')
+        for tool,data in [('sbom',sbom),('trivy',trivy),('osv',osv)]:
+            with self.subTest(tool=tool),self.assertRaises(ValueError):parse_tool_report(tool,data,2)
+        with self.assertRaises(ValueError):parse_tool_report('authz',{'cases':authz['cases']*2},0)
+    def test_incomplete_dependency_reports_rejected(self):
+        rows=[('trivy',{'SchemaVersion':2,'Results':[{}]}),
+              ('sbom',{'bomFormat':'CycloneDX','specVersion':'1.6','components':[{}]}),
+              ('osv',{'results':[{'packages':[{}]}]})]
+        for tool,data in rows:
+            with self.subTest(tool=tool),self.assertRaises(ValueError):parse_tool_report(tool,data,0)
+    def test_authz_policy_requires_all_cases(self):
+        report={'checks':[{'id':'authz','status':'completed','case_ids':['own']}],'findings':[]}
+        policy={'required':['authz'],'authz_required_cases':['own','other']}
+        self.assertEqual(evaluate_gate(report,policy)['exit_code'],2)
+        report['checks'][0]['case_ids'].append('other')
+        self.assertEqual(evaluate_gate(report,policy)['exit_code'],0)
+        with self.assertRaises(ValueError):evaluate_gate(report,{'required':['authz']})
     def test_gate_visible_in_all_formats(self):
         with tempfile.TemporaryDirectory() as tmp, tempfile.TemporaryDirectory() as cfg:
             Path(tmp,'app.py').write_text('print("hello")')
