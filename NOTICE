@@ -1,0 +1,6 @@
+Production Engineering includes selected and modified MIT-licensed material from:
+- GitHub Spec Kit — Copyright GitHub, Inc.
+- web-audit — see references/upstream/web-audit/LICENSE
+- vibe-audit — Copyright (c) 2026 ika.explains
+Original license texts are retained under references/upstream/.
+Pinned revisions: references/upstream.json. Changes: references/upstream-review.md.

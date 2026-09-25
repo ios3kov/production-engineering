@@ -1,0 +1,14 @@
+interface:
+  display_name: Production Engineering
+  short_description: Разработка по ТЗ, аудит и проверка готовности
+  default_prompt: 'Используй $production-engineering: уточни цель, реализуй задачу,
+    проведи аудит и проверь результат.'
+  icon_small: assets/icon.svg
+  icon_large: assets/icon.svg
+policy:
+  products:
+  - chatgpt
+  - codex
+  - api
+  - atlas
+  allow_implicit_invocation: true

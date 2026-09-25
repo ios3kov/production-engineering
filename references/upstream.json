@@ -1,0 +1,14 @@
+{
+  "spec-kit": {
+    "url": "https://github.com/github/spec-kit",
+    "commit": "adbd62af15f363cbaf1e69e117eb8444d525a0a0"
+  },
+  "web-audit": {
+    "url": "https://github.com/haraldalder-vibemogger/web-audit",
+    "commit": "6359ae321861c1575f5ed77afef301f53fc5267d"
+  },
+  "vibe-audit": {
+    "url": "https://github.com/haraldalder-vibemogger/vibe-audit",
+    "commit": "a74e7cd0252267c23cbb848d7ecf45874d2c874a"
+  }
+}
