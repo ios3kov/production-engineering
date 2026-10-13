@@ -60,7 +60,7 @@ python3 -m unittest discover -s scripts/tests -v
 python3 -m compileall -q scripts
 ```
 
-63 регрессионных тестов. Автоматический CI описан в `.github/workflows/tests.yml`; статус конкретного запуска смотрите в Actions.
+Регрессионные тесты. Автоматический CI описан в `.github/workflows/tests.yml`; статус конкретного запуска смотрите в Actions.
 
 ## Документация
 
@@ -86,4 +86,8 @@ python3 scripts/deep_audit.py /absolute/project --history --profile code --forma
 python3 scripts/deep_audit.py /absolute/project --url https://example.com/ --policy /policy.json
 ```
 
-Формат политики, импорт результатов и ограничения: [deep-audit.md](references/deep-audit.md). Сбор browser/axe, Lighthouse, ZAP, SBOM, OSV, Trivy и authorization evidence выполняется внешними инструментами; их живой запуск здесь не проверен. Проверено 63 автоматических тестов, включая реальные локальные Git и HTTP fixtures. Версия 1.2.1 отклоняет ошибочные и неполные отчёты и требует обязательные сценарии авторизации в политике.
+Формат политики, импорт результатов и ограничения: [deep-audit.md](references/deep-audit.md). Сбор browser/axe, Lighthouse, ZAP, SBOM, OSV, Trivy и authorization evidence выполняется внешними инструментами; их живой запуск здесь не проверен. Автоматические тесты включают реальные локальные Git и HTTP fixtures; текущий результат проверяйте в CI. Версия 1.2.1 отклоняет ошибочные и неполные отчёты и требует обязательные сценарии авторизации в политике.
+
+## Дополнительные Skills для Work и Codex
+
+В [General Skills](plugins/general-skills/README.md) собраны 8 независимых навыков для дизайна, анимации, генерации идей, исследований и проверки фактов. Они доступны как отдельный плагин через [маркетплейс](.agents/plugins/marketplace.json), не меняют корневой Production Engineering и не активируются без установки. Инструкция по подключению — в README плагина.
