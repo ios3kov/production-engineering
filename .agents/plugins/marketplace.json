@@ -1,0 +1,20 @@
+{
+  "name": "ios3kov-skills",
+  "interface": {
+    "displayName": "ios3kov Skills"
+  },
+  "plugins": [
+    {
+      "name": "general-skills",
+      "source": {
+        "source": "local",
+        "path": "./plugins/general-skills"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}
