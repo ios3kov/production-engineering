@@ -1,6 +1,6 @@
 ---
 name: fact-check
-description: Run a separate claim-by-claim verification pass on reports, drafts, analyses or generated answers, with grounded sources and explicit correction of false or unsupported assertions.
+description: "Run a separate claim-by-claim verification pass on reports, drafts, analyses or generated answers, with grounded sources and explicit correction of false or unsupported assertions."
 ---
 
 # Fact Check

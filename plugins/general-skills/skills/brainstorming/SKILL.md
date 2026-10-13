@@ -1,6 +1,6 @@
 ---
 name: brainstorming
-description: Generate genuinely distinct, non-obvious options for business, creative, personal and technical problems. Use when ideas feel repetitive, a concept needs expansion, or the user asks for unusual opportunities.
+description: "Generate genuinely distinct, non-obvious options for business, creative, personal and technical problems. Use when ideas feel repetitive, a concept needs expansion, or the user asks for unusual opportunities."
 ---
 
 # Brainstorming

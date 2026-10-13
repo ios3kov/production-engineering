@@ -1,6 +1,6 @@
 ---
 name: threejs
-description: Build and review browser-based interactive 3D with Three.js: scene structure, cameras, lighting, GLTF assets, materials, animation, shaders, interaction and rendering performance.
+description: "Build and review browser-based interactive 3D with Three.js: scene structure, cameras, lighting, GLTF assets, materials, animation, shaders, interaction and rendering performance."
 ---
 
 # Three.js

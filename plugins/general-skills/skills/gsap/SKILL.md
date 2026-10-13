@@ -1,6 +1,6 @@
 ---
 name: gsap
-description: Implement, inspect or optimize GreenSock GSAP timeline animations, text reveals, React integration and ScrollTrigger on web projects where GSAP is present or explicitly requested.
+description: "Implement, inspect or optimize GreenSock GSAP timeline animations, text reveals, React integration and ScrollTrigger on web projects where GSAP is present or explicitly requested."
 ---
 
 # GSAP

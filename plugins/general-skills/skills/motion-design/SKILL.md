@@ -1,6 +1,6 @@
 ---
 name: motion-design
-description: Plan, create and critique intentional motion for UI, typography, presentations, videos and animation assets: hierarchy, easing, timing, choreography, user feedback, accessibility and performance.
+description: "Plan, create and critique intentional motion for UI, typography, presentations, videos and animation assets: hierarchy, easing, timing, choreography, user feedback, accessibility and performance."
 ---
 
 # Motion Design

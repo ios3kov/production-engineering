@@ -1,6 +1,6 @@
 ---
 name: design-dna
-description: Extract a measurable design system, visual style and effects from screenshots, websites, or design references, then apply or compare it. Use for brand direction, presentation design, product UI, websites, or any visual-reference analysis.
+description: "Extract a measurable design system, visual style and effects from screenshots, websites, or design references, then apply or compare it. Use for brand direction, presentation design, product UI, websites, or any visual-reference analysis."
 ---
 
 # Design DNA

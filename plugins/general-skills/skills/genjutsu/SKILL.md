@@ -1,6 +1,6 @@
 ---
 name: genjutsu
-description: Art-direct and polish visual output: establish a coherent design direction, reject generic patterns, review the rendered result and audit usability, accessibility, responsiveness and performance. Use for any visual deliverable needing exceptional finish.
+description: "Art-direct and polish visual output: establish a coherent design direction, reject generic patterns, review the rendered result and audit usability, accessibility, responsiveness and performance. Use for any visual deliverable needing exceptional finish."
 ---
 
 # Genjutsu-inspired Visual Direction

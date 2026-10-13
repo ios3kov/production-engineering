@@ -1,6 +1,6 @@
 ---
 name: research-methodology
-description: Plan and execute rigorous, source-grounded investigations: market research, due diligence, competitive analysis, technical or policy research; document evidence quality, uncertainty and open questions.
+description: "Plan and execute rigorous, source-grounded investigations: market research, due diligence, competitive analysis, technical or policy research; document evidence quality, uncertainty and open questions."
 ---
 
 # Research Methodology
