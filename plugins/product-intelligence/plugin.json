@@ -1,0 +1,18 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "product-intelligence",
+  "version": "1.0.0",
+  "description": "Optional cross-project competitor research, evidence-linked customer feedback and feature-gap analysis with four offline Python helpers.",
+  "extensions": {
+    "com.openai": {
+      "interface": {
+        "displayName": "Product Intelligence",
+        "shortDescription": "Competitors, customer pain and feature gaps",
+        "longDescription": "Three optional source-grounded research skills plus offline reviews, parity, brand sweep and store-listing checks. Complements, never replaces, project development rules.",
+        "developerName": "ios3kov",
+        "category": "Productivity",
+        "websiteURL": "https://github.com/ios3kov/production-engineering"
+      }
+    }
+  }
+}

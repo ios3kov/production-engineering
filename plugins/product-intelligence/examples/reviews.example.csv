@@ -1,0 +1,3 @@
+source,url,date,rating,text,themes
+app-store,https://example.invalid/review-1,2026-10-01,2,Example review placeholder - not real evidence,pricing
+reddit,https://example.invalid/review-2,2026-10-02,,Example second placeholder - not real evidence,none
