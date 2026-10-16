@@ -299,6 +299,9 @@ def main(argv=None):
         print(json.dumps(result, indent=2))
     else:
         print(render(result, markdown=args.markdown))
+    if args.fail_under is not None and not args.checks:
+        print("parity: --fail-under needs --checks and --subject-sha; declared-only coverage cannot gate readiness", file=sys.stderr)
+        return 2
     if args.fail_under is not None and result["overall"] < args.fail_under:
         return 1
     return 0

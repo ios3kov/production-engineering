@@ -180,8 +180,13 @@ def read_rules(path, max_age_days=30):
         if any(not isinstance(n, int) or isinstance(n, bool) or n < 1 or n > 100000 for n in values.values()):
             raise ValueError("limits must be positive integers")
         url = sources.get(store)
-        if not isinstance(url, str) or not url.startswith("https://"):
-            raise ValueError("rules must cite an HTTPS official source for %s" % store)
+        official_hosts = {"app_store": ("developer.apple.com", "help.apple.com"),
+                          "google_play": ("support.google.com",)}
+        from urllib.parse import urlparse
+        if not isinstance(url, str) or urlparse(url).scheme != "https" or urlparse(url).hostname not in official_hosts[store]:
+            raise ValueError("rules must cite an HTTPS official provider source for %s" % store)
+        if not set(LIMITS[store]).issubset(values):
+            raise ValueError("rules snapshot omits known fields for %s" % store)
     return limits
 
 
