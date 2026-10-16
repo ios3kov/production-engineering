@@ -4,3 +4,6 @@ Production Engineering includes selected and modified MIT-licensed material from
 - vibe-audit — Copyright (c) 2026 ika.explains
 Original license texts are retained under references/upstream/.
 Pinned revisions: references/upstream.json. Changes: references/upstream-review.md.
+
+Optional Product Intelligence plugin includes adapted MIT-licensed source from:
+- Replica Skill — Copyright (c) 2026 Jake Schincariol. Full license: plugins/product-intelligence/references/replica-skill-LICENSE. Provenance: plugins/product-intelligence/references/UPSTREAM.md.

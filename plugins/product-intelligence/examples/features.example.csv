@@ -1,0 +1,3 @@
+feature,area,priority,original,clone,check_id,notes
+Core flow,main,must,yes,no,F01-H1,Unverified
+Optional export,sharing,should,yes,no,F02-H1,Unverified

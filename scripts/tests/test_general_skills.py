@@ -29,7 +29,7 @@ class GeneralSkillsTests(unittest.TestCase):
         self.assertTrue(manifest["description"])
         self.assertEqual(marketplace["name"], "ios3kov-skills")
         entries = marketplace["plugins"]
-        self.assertEqual(len(entries), 1)
+        self.assertEqual({entry['name'] for entry in entries}, {'general-skills', 'product-intelligence'})
         self.assertEqual(entries[0]["name"], manifest["name"])
         self.assertEqual(entries[0]["source"]["source"], "local")
         self.assertEqual(entries[0]["source"]["path"], "./plugins/general-skills")
