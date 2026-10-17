@@ -19,6 +19,10 @@ Turn visual inspiration into an explicit, reusable design specification. This ap
 5. **Generate a compact specification.** Use readable Markdown by default; emit structured JSON when it will be consumed by code or another tool.
 6. **Apply and visually verify.** If a preview or rendered output is available, compare it against the reference at equal dimensions. Check colors, proportions, typography and critical states. Revise measurable mismatches.
 
+## Research flows and interaction details
+
+For product UI, research a complete task rather than a single attractive screen. Use [reference research](../../references/interface-practice.md#reference-research) and its [source register](../../references/interface-sources.md): Refero for screens/flows when authorized access exists, Details for a specific site section, Design Spells for an interaction mechanic. Record what is observed, what is inferred and why it fits this product. A gallery inclusion is not proof of usability or conversion. Do not turn provider material into an AI training or evaluation dataset, bulk-download a library, or copy identity. Existing access/terms must be checked before use; no connection is installed by these instructions.
+
 ## Deliverables
 
 A concise design profile with: reference/source; palette with confidence; typography; layout/spacing; elements; motion/effects; accessibility; do/don't rules; open questions; and the next practical step.

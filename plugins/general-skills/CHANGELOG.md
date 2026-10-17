@@ -1,5 +1,11 @@
 # General Skills changelog
 
+## 1.2.0 — 2026-10-17
+
+Extend genjutsu, motion-design and design-dna with the accepted practices from the nine-source review. Preserve the earlier visual-production guidance and five unrelated skills. Purpose-led composition and truthful demonstrations; real-input stress and preview variants; recovery/copy; interruption and profiling; authorized reference research. Sources, exclusions and access boundaries are kept in optional local references. No global instruction injection, external API, binary helper, motion score or new plugin dependency.
+
+Browser fixtures in the parent repository qualify an original measurement helper; they are not application or live agent acceptance. Obscura is a separately isolated extraction experiment, not a visual-QA replacement. Exact execution results belong to the parent repository's adoption record and CI artifacts, not to a claim that prose improves model output.
+
 ## 1.1.0 — 2026-10-17
 
 Scope: the two existing skills `brainstorming` and `genjutsu`, with optional local references. No new skill, executable tool, dependency, hook, network permission or AS/AE rule is added. `design-dna` and the other five skills keep their previous bytes.

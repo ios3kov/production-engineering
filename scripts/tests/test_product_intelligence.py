@@ -34,7 +34,7 @@ class Packaging(unittest.TestCase):
         cfg = json.loads((PLUGIN / "plugin.json").read_text(encoding="utf-8"))
         market = json.loads((ROOT / ".agents/plugins/marketplace.json").read_text(encoding="utf-8"))
         self.assertEqual(cfg["name"], "product-intelligence")
-        self.assertEqual(cfg["version"], "1.0.0")
+        self.assertEqual(cfg["version"], "1.0.1")
         self.assertEqual({r["name"] for r in market["plugins"]}, {"general-skills", "product-intelligence"})
         self.assertEqual(next(r for r in market["plugins"] if r["name"] == cfg["name"])["source"]["path"], "./plugins/product-intelligence")
         self.assertIn("replica-skill-LICENSE", (PLUGIN / "references/UPSTREAM.md").read_text())

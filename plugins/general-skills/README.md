@@ -2,6 +2,10 @@
 
 An optional, cross-project set of eight **independent** Agent Skills. No changes to the existing `production-engineering` skill or the AE/AS project rules are required.
 
+## Version 1.2.0
+
+Adds scoped UI resilience, working-variant previews, interruption-aware motion, evidence-first layout inspection and authorized flow/interaction reference research to the existing skills. See [interface practice](references/interface-practice.md) and [nine-source register](references/interface-sources.md). Browser measurement code and its isolated qualification live separately in the parent repository's `integrations/browser-qa`; no executable hooks, provider credentials or auto-installed tools are bundled in this plugin. The five other General Skills keep their previous contents. Repository publication does not refresh an installed client copy.
+
 ## Version 1.1.0
 
 `brainstorming` gains an optional visual-mechanism library. `genjutsu` gains a scoped production brief, identity/product-truth checks and cause-specific visual repair. Details, acceptance scope and verification limits are in the [changelog](CHANGELOG.md). The other six skills, including `design-dna`, are unchanged. Publishing an update here does not prove that an already installed copy has refreshed; check its version in the supported client.

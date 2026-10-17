@@ -23,6 +23,10 @@ Scope every gate to the application and change. Required-but-unavailable means B
 | Privacy/legal | Data inventory, retention/deletion, consent network behavior, regional applicability | Applicable requirement unresolved |
 | Supply chain | Inspect CI permissions, secrets, dependency scripts and artifact provenance | Untrusted execution with privileged credentials |
 
+## Optional browser measurement and stress supplement
+
+For changed UI, reuse the project's actual component props or test API to exercise long/localized text, large/empty data, missing media, failed saves and cancellation. Use [the browser QA integration](../integrations/browser-qa/README.md) when an authorized real browser is available. Measurements are candidates, not aesthetic or accessibility certification. Check behavior after the action before taking a screenshot; review baselines in the existing evidence workflow and do not automatically accept newly generated snapshots. This is not a second release gate or an implicit installation requirement. Native app/AE/iPhone acceptance stays with the actual host.
+
 ## Specialized messaging gates
 For a messenger: verify E2EE initialization after reload, device replacement, key/session expiry, recovery and attachment encryption. Test missing/invalid contact permission, invite-only policies, unauthorized chat membership and attachment access. A four-digit PIN is low entropy: validate local/device binding, rate limits and password recovery; do not present it as independent strong authentication. Check database/object-store authorization, upload ownership and transport/error-log leakage. These are test requirements, not assumptions about implementation.
 

@@ -1,7 +1,7 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "product-intelligence",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Optional cross-project competitor research, evidence-linked customer feedback and feature-gap analysis with four offline Python helpers.",
   "extensions": {
     "com.openai": {

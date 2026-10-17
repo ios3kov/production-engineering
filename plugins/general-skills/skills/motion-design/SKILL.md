@@ -16,6 +16,10 @@ Design animation to communicate state, hierarchy, personality or story, not to f
 5. **Implementation.** Pick native capabilities for the target: AE keyframes, SVG/Lottie where supported, GSAP on appropriate web stacks, SwiftUI animation for Apple UI, or static alternatives. Do not assume interchangeability or promise lossless export.
 6. **Verify.** Preview at actual playback speed. Check clarity, contrast, device performance, motion sensitivity and an appropriate reduced-motion or static alternative.
 
+## Interruption and profiling
+
+For interactive transitions, consult [motion interruption and profiling](../../references/interface-practice.md#motion-interruption-and-profiling). Repeated actions, reversal, cancellation, lost pointer capture and reduced motion must leave a coherent final state. Inspect the actual performance trace before changing rendering strategy; never add a motion quota or blanket will-change. [Design Spells](https://designspells.com/) is an optional reference for interaction mechanics, not a ready-made exporter. Sources: [adoption register](../../references/interface-sources.md).
+
 ## Heuristics, not hard rules
 
 - Ease-in / ease-out usually reads more naturally for spatial motion than constant speed. Linear is appropriate for constant-rate rotation, progress, and intentionally mechanical movement.
