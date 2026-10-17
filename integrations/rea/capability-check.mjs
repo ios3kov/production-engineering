@@ -44,7 +44,13 @@ try{
  fs.writeFileSync(c,'__attribute__((noinline)) int owned_sum(int a,int b){return a+b;}\nint main(void){return owned_sum(2,3);}\n');
  command('compile-native-fixture','cc',['-O0','-g',c,'-o',binary]);
  const native=rea('ghidra-overview',['analyze',binary,'--provider','ghidra']);
- check('native-provider-and-digest',()=>{assert.equal(native.subject.digest.sha256,sha(fs.readFileSync(binary)));assert.ok(JSON.stringify(native.provider).toLowerCase().includes('ghidra'));});
+ check('native-provider-and-digest',()=>{
+   assert.equal(native.subject.digest.sha256,sha(fs.readFileSync(binary)));
+   // The overview is a composed workflow, with its actual engine explicitly nested.
+   const provider=native.analysis_profile.parameters.upstream_analysis_profile.provider;
+   assert.equal(provider.id,'ghidra');assert.equal(provider.version,'12.1.4');
+   assert.ok(native.normalized_result.procedure_count>0);
+ });
  const func=rea('ghidra-function',['function',binary,'owned_sum','--provider','ghidra']);
  check('native-function-found',()=>assert.ok(JSON.stringify(func.normalized_result).includes('owned_sum')));
  if(process.platform==='darwin'){
