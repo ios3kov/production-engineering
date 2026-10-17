@@ -45,6 +45,8 @@ def local_path(value: str) -> Path:
 
 def tree_digest(root: Path) -> str:
     """Commit exact file bytes and link targets; never follow a link outside root."""
+    if root.is_symlink() or not root.is_dir():
+        raise ValueError("Runtime tree is missing or linked")
     digest = hashlib.sha256()
     for directory, dirs, names in os.walk(root, followlinks=False):
         dirs[:] = sorted(d for d in dirs if d != ".git")
@@ -100,7 +102,7 @@ def require_run(argv: list[str], prefix: Path, env: dict[str, str], label: str, 
 def config_text(prefix: Path) -> str:
     return ("# Merge this fragment only after reviewing it; existing configuration is not edited.\n"
             "[mcp_servers.rea_static]\ncommand = " + json.dumps(sys.executable) + "\nargs = " +
-            json.dumps([str(HERE / "runtime.py"), "mcp", str(prefix)]) +
+            json.dumps([str(prefix / "runtime.py"), "mcp", str(prefix)]) +
             "\nstartup_timeout_sec = 180\ntool_timeout_sec = 360\nenabled_tools = " + json.dumps(MCP_TOOLS) + "\n")
 
 
@@ -116,12 +118,16 @@ def install(prefix: Path, apply: bool) -> None:
     node = shutil.which("node")
     if not node or subprocess.check_output([node, "--version"], text=True).strip() != "v24.18.0":
         raise ValueError("Use already installed Node 24.18.0; this installer does not upgrade Node")
-    for tool in ("git", "npm", "java", "cc", "python3", "unzip"):
+    for tool in ("git", "npm", "java", "cc", "nm", "python3", "unzip"):
         if not shutil.which(tool):
             raise ValueError("Missing prerequisite: " + tool)
+    if shutil.disk_usage(prefix.parent).free < 5 * 1024**3:
+        raise ValueError("Keep at least 5 GiB free for this source/native build")
     prefix.mkdir(mode=0o700, parents=False)
     for name in ("home", "tmp", "evidence", "source"):
         (prefix / name).mkdir(mode=0o700)
+    for filename in ("runtime.py", "repair-check.mjs", "capability-check.mjs"):
+        shutil.copy2(HERE / filename, prefix / filename)
     java_home = os.environ.get("JAVA_HOME")
     env = environment(prefix, java_home)
     env["PATH"] = str(Path(node).parent) + os.pathsep + env["PATH"]
@@ -154,12 +160,15 @@ def install(prefix: Path, apply: bool) -> None:
     if sys.platform == "darwin" or platform.machine().lower() not in ("x86_64", "amd64"):
         require_run(["./gradlew", "--no-daemon", "buildNatives"], prefix, env, "ghidra-native-build", engine / "support" / "gradle")
     for filename in ("repair-check.mjs", "capability-check.mjs"):
-        require_run([node, str(HERE / filename)], prefix, env, "qualify-" + filename.removesuffix(".mjs"))
+        require_run([node, str(prefix / filename)], prefix, env, "qualify-" + filename.removesuffix(".mjs"))
     for name in ("repair-report.json", "capability-report.json"):
         report = json.loads((prefix / "evidence" / name).read_text())
         if report.get("status") != "PASS" or report.get("source_commit") != COMMIT:
             raise ValueError("Qualification did not pass: " + name)
-    manifest = {"schema_version": 1, "source_commit": COMMIT, "node": str(Path(node).resolve()),
+    catalog = json.loads((prefix / "evidence/mcp-catalog.json").read_text())
+    if not set(MCP_TOOLS).issubset({tool["name"] for tool in catalog["tools"]}):
+        raise ValueError("The actual MCP catalog lacks a selected static tool")
+    manifest = {"schema_version": 1, "source_commit": COMMIT, "launcher_sha256": sha(prefix / "runtime.py"), "node": str(Path(node).resolve()),
                 "node_sha256": sha(Path(node)), "source_tree_sha256": tree_digest(source),
                 "engine_tree_sha256": tree_digest(engine), "ghidra_archive_sha256": GHIDRA_SHA,
                 "java_home": java_home, "host": [sys.platform, platform.machine()],
@@ -174,6 +183,10 @@ def verify(prefix: Path) -> dict:
     manifest = json.loads((prefix / "runtime.json").read_text())
     if manifest.get("source_commit") != COMMIT or manifest.get("host") != [sys.platform, platform.machine()]:
         raise ValueError("Unqualified source or host")
+    if sha(prefix / "runtime.py") != manifest.get("launcher_sha256"):
+        raise ValueError("Installed launcher changed since qualification")
+    if set(manifest.get("reports", {})) != {"repair-report.json", "capability-report.json"}:
+        raise ValueError("Required qualification reports are missing")
     for target, expected in [(Path(manifest["node"]), manifest["node_sha256"])]:
         if sha(target) != expected:
             raise ValueError("Node changed since qualification")
@@ -181,6 +194,9 @@ def verify(prefix: Path) -> dict:
         if tree_digest(prefix / name) != manifest[key]:
             raise ValueError("Runtime changed since qualification: " + name)
     for name, digest in manifest["reports"].items():
+        report = json.loads((prefix / "evidence" / name).read_text())
+        if report.get("status") != "PASS" or report.get("source_commit") != COMMIT:
+            raise ValueError("Qualification report is not a passing check of the fixed source")
         if sha(prefix / "evidence" / name) != digest:
             raise ValueError("Qualification report changed")
     return manifest
@@ -189,8 +205,8 @@ def verify(prefix: Path) -> dict:
 def run(prefix: Path, operation: str, target: str, output: Path, selector: str | None) -> int:
     manifest = verify(prefix)
     source = local_path(target)
-    if not source.exists():
-        raise ValueError("Target is missing")
+    if not (source.is_file() or source.is_dir()):
+        raise ValueError("Target must be a regular file or directory")
     if operation not in OPS:
         raise ValueError("Operation is outside the static profile")
     if operation == "native-function":
