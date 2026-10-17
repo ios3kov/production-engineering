@@ -20,7 +20,7 @@ Added offline GitHub Actions supply-chain checks, Git commit/dirty-state report 
 
 ## 1.1.0 — 2026-09-25
 
-Added bounded Git-history secret scanning, explicit live HTTP checks, strict imports for browser/axe, Lighthouse, Semgrep, ZAP, SBOM, OSV, Trivy and authorization-matrix execution in an authorized external runner; this version strictly imports their results. Browser collection remains external; optional engine live execution is not verified. 51 regression tests pass, including graceful handling of a failed Git index command.
+Added bounded Git-history secret scanning, explicit live HTTP checks, strict imports for browser/axe, Lighthouse, Semgrep and ZAP, and a required-check policy gate. Added source-scope and evidence-age validation. Browser collection remains external; optional engine live execution is not verified. 51 regression tests pass, including graceful handling of a failed Git index command.
 
 ## 1.0.0 — 2026-09-25
 
