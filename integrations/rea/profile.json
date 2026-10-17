@@ -11,5 +11,11 @@
   "qualification": "PER_EXACT_CI_RUN",
   "native_provider": "ghidra",
   "deferred": ["runtime capture", "network captures", "Frida", "debugger consoles", "device management"],
-  "product_readiness": "NOT_ASSESSED"
+  "product_readiness": "NOT_ASSESSED",
+  "quarantine": {
+    "issue": "https://github.com/morluto/rea/issues/3551",
+    "reviewed_at": "2026-10-17",
+    "blocked_operations": ["compare-applications", "compare-evidence", "feature-trace", "javascript", "semantic-trace", "view"],
+    "reopen": "Corrected exact package plus real export-binding regression qualification"
+  }
 }

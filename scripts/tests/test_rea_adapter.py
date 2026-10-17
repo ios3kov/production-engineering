@@ -29,8 +29,20 @@ class ReaAdapterTests(unittest.TestCase):
         result=rea.make_plan('javascript',str(self.target),advertised_commands={'analyze-javascript-application'})
         self.assertEqual(result['argv'],['rea','analyze-javascript-application',str(self.target),'--json'])
         self.assertEqual(result['execution_status'],'NOT_RUN')
-        self.assertEqual(result['readiness'],'REQUIRES_HOST_REVIEW')
+        self.assertEqual(result['readiness'],'BLOCKED')
+        self.assertTrue(any('3551' in reason for reason in result['blockers']))
         self.assertEqual(result['product_readiness'],'NOT_ASSESSED')
+
+    def test_known_issue_blocks_even_advertised_commands(self):
+        self.raw.write_text('{}')
+        for op in sorted(rea.QUARANTINED_OPERATIONS):
+            kwargs = {'right': str(self.raw)} if op == 'compare-evidence' else {}
+            result = rea.make_plan(op, str(self.raw), advertised_commands={rea.OPERATIONS[op][0]}, **kwargs)
+            with self.subTest(op=op):
+                self.assertEqual(result['readiness'], 'BLOCKED')
+                self.assertIn(rea.QUARANTINE_REASON, result['blockers'])
+        result = rea.make_plan('inventory', str(self.target), advertised_commands={'inspect-artifact'})
+        self.assertEqual(result['readiness'], 'REQUIRES_HOST_REVIEW')
 
     def test_missing_capability_is_blocked(self):
         for catalog in (None, {'unrelated'}):

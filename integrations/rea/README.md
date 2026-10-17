@@ -1,5 +1,27 @@
 # REA: optional Reference Audit integration
 
+## Admission correction — 2026-10-17
+
+**REA 6.5.0 JavaScript analysis is QUARANTINED**, based on the upstream
+[reproduction of missing CommonJS exports](https://github.com/morluto/rea/issues/3551).
+Renamed Webpack factory parameters can lose exports while the result reports
+exact/complete coverage. Our simple fixture smoke did not cover this defect.
+Do not admit 6.5.0 JS/export facts as authoritative, even with exit zero or
+complete coverage. The planner now returns BLOCKED for JavaScript analysis,
+feature/semantic traces, application comparisons, generic retained views and
+Evidence comparisons (which can inherit JS facts). This conservatively blocks
+mixed/unknown-origin workflows rather than claiming a reliable bundle detector.
+No bypass switch is provided. Package inventory is not JS export recovery;
+that lane and explicit native/Ghidra plans retain their existing separate checks.
+
+To reopen the lane, select a corrected immutable package, review its exact
+bytes and run a real regression covering renamed module/export parameters and
+shadowed bindings through the installed interface. A pending upstream patch or
+an unchanged version label is not sufficient. Earlier ZIP/JS/summary smoke
+results remain historical narrow fixture observations, not production admission.
+The original capability shortlist below is retained as planned scope, not a
+claim that all listed operations are currently admitted.
+
 Use only for an explicitly selected shipped artifact, package, native function,
 or observed external product contract. Ordinary source development does not
 load or run REA. The existing AS/AE Reference Audit, ownership rules, local
