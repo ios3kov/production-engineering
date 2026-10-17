@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
   push:
     branches: ['fix/rea-export-binding-qualification']
-    paths: ['integrations/rea/**', '.github/workflows/rea-corrected-qualification.yml']
+    paths: ['integrations/rea/qualify-bindings.mjs', '.github/workflows/rea-corrected-qualification.yml']
 permissions:
   contents: read
 jobs:
@@ -54,15 +54,15 @@ jobs:
               cp /q/baseline/package-lock.json /q/output/baseline-package-lock.json
               npm view --registry=https://registry.npmjs.org rea-agents@6.5.0 version gitHead dist --json > /q/output/baseline-npm.json
             '
-      - name: Compile corrected source without network access
+      - name: Compile corrected source and remove development dependencies offline
         shell: bash
         run: |
           set -euo pipefail
           docker run --rm --network=none --read-only --cap-drop=ALL --security-opt=no-new-privileges \
             --pids-limit=512 --memory=6g --cpus=2 --tmpfs /tmp:rw,nosuid,nodev,size=2g \
-            --user "$(id -u):$(id -g)" -e HOME=/tmp \
+            --user "$(id -u):$(id -g)" -e HOME=/tmp -e TURBO_TELEMETRY_DISABLED=1 \
             --mount "type=bind,src=$REA_Q_ROOT/source,dst=/source" \
-            "$REA_Q_IMAGE" sh -eu -c 'cd /source; npm run build:cached'
+            "$REA_Q_IMAGE" sh -eu -c 'cd /source; npm run build:cached; npm prune --omit=dev --omit=optional --ignore-scripts --offline --no-audit --no-fund'
       - name: Run baseline and corrected regression with network disabled
         shell: bash
         run: |
@@ -79,6 +79,22 @@ jobs:
             --mount "type=bind,src=$GITHUB_WORKSPACE/integrations/rea/qualify-bindings.mjs,dst=/qualify.mjs,readonly" \
             --tmpfs /q/home:rw,nosuid,nodev,size=256m \
             "$REA_Q_IMAGE" node /qualify.mjs
+      - name: Pack only the qualified runtime files
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json,os,pathlib,tarfile,hashlib
+          root=pathlib.Path(os.environ['REA_Q_ROOT'])
+          manifest=json.loads((root/'output/runtime-manifest.json').read_text())
+          target=root/'output/rea-corrected-linux-x64.tar.gz'
+          with tarfile.open(target,'w:gz',dereference=False) as archive:
+              for entry in manifest['entries']:
+                  archive.add(root/'source'/entry['path'],arcname=entry['path'],recursive=False)
+          with target.open('rb') as f: digest=hashlib.file_digest(f,'sha256').hexdigest()
+          (root/'output/runtime-archive.sha256').write_text(digest+'  '+target.name+'\n')
+          print('Qualified runtime archive SHA-256: '+digest)
+          PY
       - name: Retain exact regression outputs and source identity
         if: always() && env.REA_Q_ROOT != ''
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
