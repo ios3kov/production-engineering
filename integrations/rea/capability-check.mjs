@@ -43,8 +43,13 @@ try{
  fs.writeFileSync(c,'__attribute__((noinline)) int owned_sum(int a,int b){return a+b;}\nint main(void){return owned_sum(2,3);}\n');
  command('compile-native-fixture','cc',['-O0','-g',c,'-o',binary]);
  const symbols=command('native-symbols','nm',['-g',binary]).toString('utf8');
- const symbol=symbols.split('\n').map(line=>line.trim().split(/\s+/).at(-1)).find(name=>/^_?owned_sum$/.test(name));
- assert.ok(symbol,'compiled fixture symbol missing');
+ const symbolRows=symbols.split('\n').map(line=>line.trim().split(/\s+/));
+ const sumRow=symbolRows.find(row=>/^_?owned_sum$/.test(row.at(-1)));
+ const mainRow=symbolRows.find(row=>/^_?main$/.test(row.at(-1)));
+ assert.ok(sumRow && mainRow,'compiled fixture symbols missing');
+ assert.match(sumRow[0],/^[0-9a-fA-F]+$/);assert.match(mainRow[0],/^[0-9a-fA-F]+$/);
+ const symbol=sumRow.at(-1);
+ const mainOffset=BigInt('0x'+mainRow[0])-BigInt('0x'+sumRow[0]);
  const native=rea('ghidra-overview',['analyze',binary,'--provider','ghidra']);
  check('native-provider-and-digest',()=>{
    assert.equal(native.subject.digest.sha256,sha(fs.readFileSync(binary)));
@@ -58,7 +63,10 @@ try{
    assert.ok(func.normalized_result.procedure.body.total_bytes>0);
    assert.ok(func.normalized_result.assembly.length>0);
    assert.match(func.normalized_result.pseudocode,/\+/);
-   assert.ok(func.normalized_result.callers.some(caller=>/^_?main$/.test(caller.name)));
+   // Ghidra can name main "entry"; nm supplies an independent relative address.
+   // The offset also handles the load base Ghidra selects for a PIE executable.
+   const expectedMain=BigInt(func.normalized_result.procedure.address)+mainOffset;
+   assert.ok(func.normalized_result.callers.some(caller=>BigInt(caller.address)===expectedMain),'main caller address absent');
  });
  if(process.platform==='darwin'){
    const bundle=path.join(work,'Owned.app');fs.mkdirSync(path.join(bundle,'Contents','MacOS'),{recursive:true});
