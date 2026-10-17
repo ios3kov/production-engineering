@@ -1,0 +1,67 @@
+name: REA repaired-source qualification
+on:
+  workflow_dispatch:
+  push:
+    branches: ['fix/rea-complete-qualification']
+    paths: ['integrations/rea/**', '.github/workflows/rea-repaired-qualification.yml']
+permissions:
+  contents: read
+jobs:
+  repaired-source:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-15]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '24.18.0'
+      - name: Acquire pinned source without lifecycle scripts
+        shell: bash
+        run: |
+          set -euo pipefail
+          root="$(mktemp -d "$RUNNER_TEMP/rea-repaired.XXXXXX")"
+          mkdir "$root/source" "$root/output"
+          echo "REA_RUNTIME=$root/source" >> "$GITHUB_ENV"
+          echo "REA_OUTPUT=$root/output" >> "$GITHUB_ENV"
+          git -C "$root/source" init
+          git -C "$root/source" remote add origin https://github.com/dakjdakd/rea.git
+          git -C "$root/source" fetch --depth=1 origin 20643d4a47b0562aa794f0a15903630c62912c80
+          git -C "$root/source" checkout --detach FETCH_HEAD
+          test "$(git -C "$root/source" rev-parse HEAD)" = 20643d4a47b0562aa794f0a15903630c62912c80
+          cd "$root/source"
+          npm ci --ignore-scripts --no-audit --no-fund 2>&1 | tee "$root/output/acquisition.log"
+          cp package-lock.json "$root/output/package-lock.json"
+          git status --porcelain > "$root/output/source-status.txt"
+      - name: Build exact corrected source
+        shell: bash
+        env:
+          NODE_OPTIONS: '--max-old-space-size=4096'
+        run: |
+          set -euo pipefail
+          cd "$REA_RUNTIME"
+          npm run compile 2>&1 | tee "$REA_OUTPUT/build.log"
+      - name: Real corrected CLI and stdio MCP regression
+        shell: bash
+        run: |
+          set -euo pipefail
+          node integrations/rea/repair-check.mjs
+      - name: Focused upstream source regression
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$REA_RUNTIME"
+          node node_modules/vitest/vitest.mjs run src/domain/javascript/javascriptStaticAnalysisModuleIndex.test.ts src/domain/javascript/javascriptAstFingerprint.test.ts src/domain/javascript/javascriptStaticAnalysis.member_path_depth.test.ts 2>&1 | tee "$REA_OUTPUT/upstream-tests.log"
+      - name: Retain exact results and source identity
+        if: always() && env.REA_OUTPUT != ''
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: rea-repaired-${{ matrix.os }}-${{ github.sha }}
+          path: ${{ env.REA_OUTPUT }}/
+          retention-days: 30
+          if-no-files-found: error
