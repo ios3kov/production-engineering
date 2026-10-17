@@ -16,7 +16,7 @@ Reject failed and structurally incomplete dependency reports. Trivy imports requ
 
 ## 1.2.0 — 2026-09-25
 
-Added offline GitHub Actions supply-chain checks, Git commit/dirty-state report binding, versioned ASVS references, and strict CycloneDX, OSV, Trivy and authorization-matrix evidence adapters. Evidence schema v2 binds the source digest, Git commit and dirty state. Added regression coverage for the new contracts; 55 tests pass.
+Added offline GitHub Actions supply-chain checks, Git commit/dirty-state report binding, versioned ASVS references, and strict CycloneDX, OSV, Trivy and authorization-matrix evidence adapters. Evidence schema v2 now requires matching source identity. Added regression coverage for the new contracts; 55 tests pass.
 
 ## 1.1.0 — 2026-09-25
 
