@@ -1,0 +1,24 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Owned UI QA fixture</title>
+<style>
+*{box-sizing:border-box}body{font:16px sans-serif;margin:0;padding:20px}main{max-width:620px}button,input,select{font:inherit;max-width:100%}button{min-height:40px}label{display:block;margin:12px 0}input{width:100%}.name{overflow-wrap:anywhere}#panel{width:180px;height:30px;transform:translateX(0);transition:transform .2s ease-out}#panel.open{transform:translateX(70px)}#drag{padding:12px;border:1px solid;touch-action:none;user-select:none}#defects{display:none}body[data-defects] #defects{display:block}#clipped{width:90px;overflow:hidden;white-space:nowrap}#obscured{position:relative;width:180px;height:42px}#cover{position:absolute;inset:0;z-index:5;background:white}#wide{width:2000px}#wrapped{width:100px}.comfortable main{padding:16px}.dense main{padding:0}@media(prefers-reduced-motion:reduce){#panel{transition:none}}
+</style>
+<main><h1>Owned UI fixture</h1><label>Prototype variant <select id="variant"><option>dense</option><option>comfortable</option></select></label>
+<p class="name" data-ui-qa id="name">Loading</p><p data-ui-qa id="count"></p><div id="empty" hidden>No items. Create one to get started.</div>
+<label>Draft <input id="draft" value="Keep my work"></label><button id="save">Save changes</button><p id="status" role="status"></p>
+<button id="toggle" aria-expanded="false" aria-controls="panel">Toggle panel</button><div id="panel" data-ui-qa>Panel</div>
+<div id="drag" tabindex="0" data-dragging="false">Drag or press Escape to cancel</div>
+<div id="defects"><div data-ui-qa id="clipped">Intentionally clipped long text</div><div id="obscured"><button data-ui-qa id="blocked">Blocked action</button><div id="cover"></div></div><p data-ui-qa id="wrapped">These words wrap across many short lines.</p><img data-ui-qa id="broken" alt="Broken fixture" width="60" height="40"><div id="wide">Intentional overflow</div><span data-ui-qa id="badfont">Font probe</span></div></main>
+<script>
+const byId=id=>document.getElementById(id);
+let data={name:'A',count:0,items:[]};
+function renderData(value){data=value;byId('name').textContent=data.name;byId('count').textContent=String(data.count);byId('empty').hidden=data.items.length!==0;document.body.dataset.ready='yes';}
+fetch('/data').then(r=>r.json()).then(renderData).catch(()=>{byId('status').textContent='Could not load data. Reload to retry.';});
+byId('variant').onchange=()=>{document.body.className=byId('variant').value;};
+byId('save').onclick=async()=>{const button=byId('save');if(button.disabled)return;button.disabled=true;try{const r=await fetch('/save',{method:'POST',body:JSON.stringify({draft:byId('draft').value})});if(!r.ok)throw Error('save');byId('status').textContent='Changes saved';}catch{byId('status').textContent='Changes were not saved. Your draft is kept. Try Save changes again.';}finally{button.disabled=false;}};
+byId('toggle').onclick=()=>{const open=byId('toggle').getAttribute('aria-expanded')!=='true';byId('toggle').setAttribute('aria-expanded',String(open));byId('panel').classList.toggle('open',open);};
+const drag=byId('drag');function cancelDrag(){drag.dataset.dragging='false';}
+drag.onpointerdown=e=>{drag.dataset.dragging='true';drag.setPointerCapture(e.pointerId);};
+for(const event of ['pointercancel','lostpointercapture','pointerup'])drag.addEventListener(event,cancelDrag);
+document.addEventListener('keydown',e=>{if(e.key==='Escape')cancelDrag();});window.addEventListener('blur',cancelDrag);
+if(new URLSearchParams(location.search).has('defects')){document.body.dataset.defects='yes';byId('broken').src='/missing-image';const face=new FontFace('BrokenFixture','url(data:font/woff2;base64,AAAA)');document.fonts.add(face);byId('badfont').style.fontFamily='BrokenFixture';face.load().catch(()=>{});}
+</script></html>

@@ -1,0 +1,78 @@
+name: Design QA qualification
+on:
+  workflow_dispatch:
+  push:
+    branches: ['feat/design-research-qa-1.2']
+    paths: ['integrations/browser-qa/**', '.github/workflows/design-qa.yml']
+  pull_request:
+    paths: ['integrations/browser-qa/**', '.github/workflows/design-qa.yml']
+permissions:
+  contents: read
+jobs:
+  qualify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        lane: [browser, obscura]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: Acquire explicitly versioned browser environment
+        shell: bash
+        run: |
+          set -euo pipefail
+          root="$(mktemp -d "$RUNNER_TEMP/design-qa.XXXXXX")"
+          mkdir "$root/deps" "$root/output" "$root/obscura"
+          echo "QA_ROOT=$root" >> "$GITHUB_ENV"
+          docker pull mcr.microsoft.com/playwright/python:v1.57.0-noble
+          image=$(docker image inspect mcr.microsoft.com/playwright/python:v1.57.0-noble --format '{{.Id}}')
+          echo "QA_IMAGE=$image" >> "$GITHUB_ENV"
+          echo "$image" > "$root/output/image-id.txt"
+          git rev-parse HEAD > "$root/output/revision.txt"
+          git archive --format=tar HEAD > "$root/output/source.tar"
+          docker run --rm --read-only --cap-drop=ALL --security-opt=no-new-privileges --tmpfs /tmp:rw,nosuid,nodev,size=1g --user "$(id -u):$(id -g)" -e HOME=/tmp --mount "type=bind,src=$root/deps,dst=/deps" --mount "type=bind,src=$GITHUB_WORKSPACE/integrations/browser-qa/requirements.txt,dst=/requirements.txt,readonly" "$image" python3 -m pip install --disable-pip-version-check --only-binary=:all: --no-deps --no-compile --target /deps -r /requirements.txt
+          docker run --rm --network=none --read-only --cap-drop=ALL --security-opt=no-new-privileges --mount "type=bind,src=$root/deps,dst=/deps,readonly" "$image" python3 -m pip freeze --path /deps > "$root/output/dependencies.txt"
+      - name: Acquire checksum-pinned Obscura candidate, without running it
+        if: matrix.lane == 'obscura'
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --location --proto '=https' --tlsv1.2 https://github.com/h4ckf0r0day/obscura/releases/download/v0.2.4/obscura-x86_64-linux-no-render.tar.gz -o "$QA_ROOT/obscura.tar.gz"
+          echo "48ec360d75333e204e5eb5be4ce30fe4a1e57f2ca30fe985247eadf50a0c89d7  $QA_ROOT/obscura.tar.gz" | sha256sum --check
+          python3 - <<'PY'
+          import os,tarfile,pathlib
+          r=pathlib.Path(os.environ['QA_ROOT'])
+          with tarfile.open(r/'obscura.tar.gz') as t: t.extractall(r/'obscura',filter='data')
+          PY
+      - name: Execute only owned fixtures with external network disabled
+        shell: bash
+        env:
+          QA_LANE: ${{ matrix.lane }}
+        run: |
+          set -euo pipefail
+          docker run --rm --network=none --read-only --cap-drop=ALL --security-opt=no-new-privileges \
+            --pids-limit=512 --memory=4g --cpus=2 --shm-size=1g --tmpfs /tmp:rw,nosuid,nodev,size=2g \
+            --user "$(id -u):$(id -g)" -e HOME=/tmp -e PYTHONPATH=/deps -e QA_LANE="$QA_LANE" -e TEST_REVISION="$(git rev-parse HEAD)" \
+            --mount "type=bind,src=$QA_ROOT/deps,dst=/deps,readonly" \
+            --mount "type=bind,src=$QA_ROOT/obscura,dst=/candidate,readonly" \
+            --mount "type=bind,src=$QA_ROOT/output,dst=/out" \
+            --mount "type=bind,src=$GITHUB_WORKSPACE/integrations/browser-qa,dst=/qa,readonly" \
+            "$QA_IMAGE" sh -eu -c '
+              if [ "$QA_LANE" = browser ]; then
+                for browser in chromium firefox webkit; do
+                  UI_QA_BROWSER="$browser" UI_QA_OUTPUT=/out python3 /qa/test_browser.py
+                done
+              else
+                OBSCURA_BINARY=/candidate/obscura UI_QA_OUTPUT=/out/pilot python3 /qa/obscura_pilot.py
+              fi
+            '
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always() && env.QA_ROOT != ''
+        with:
+          name: design-qa-${{ matrix.lane }}-${{ github.sha }}
+          path: ${{ env.QA_ROOT }}/output/
+          retention-days: 30
+          if-no-files-found: error
