@@ -2,8 +2,10 @@
 import contextlib
 import importlib.util
 import io
+import json
 import os
 from pathlib import Path
+import platform
 import subprocess
 import sys
 import tempfile
@@ -41,6 +43,27 @@ class RuntimeTests(unittest.TestCase):
         self.assertNotEqual(first,second)
         file.rename(self.root/'b');self.assertNotEqual(second,runtime.tree_digest(self.root))
 
+    def test_missing_tree_is_not_an_empty_valid_runtime(self):
+        with self.assertRaisesRegex(ValueError,'missing'):
+            runtime.tree_digest(self.root/'absent')
+
+    def test_changed_installed_launcher_is_refused(self):
+        launcher=self.root/'runtime.py';launcher.write_text('original')
+        manifest={'source_commit':runtime.COMMIT,'host':[sys.platform,platform.machine()],
+                  'launcher_sha256':runtime.sha(launcher),'reports':{}}
+        (self.root/'runtime.json').write_text(json.dumps(manifest))
+        launcher.write_text('changed')
+        with self.assertRaisesRegex(ValueError,'launcher changed'):
+            runtime.verify(self.root)
+
+    def test_missing_qualification_reports_are_refused(self):
+        launcher=self.root/'runtime.py';launcher.write_text('example')
+        manifest={'source_commit':runtime.COMMIT,'host':[sys.platform,platform.machine()],
+                  'launcher_sha256':runtime.sha(launcher),'reports':{}}
+        (self.root/'runtime.json').write_text(json.dumps(manifest))
+        with self.assertRaisesRegex(ValueError,'reports are missing'):
+            runtime.verify(self.root)
+
     def test_external_symlink_is_refused(self):
         (self.root/'outside').symlink_to(sys.executable)
         with self.assertRaises(ValueError):runtime.tree_digest(self.root)
@@ -53,6 +76,7 @@ class RuntimeTests(unittest.TestCase):
         for dangerous in ('gdb_console','capture_process_scenario','instrument_with_frida','install_adb_package'):
             self.assertNotIn(dangerous,config['enabled_tools'])
         self.assertEqual(config['args'][1],'mcp')
+        self.assertEqual(config['args'][0],str(self.root/'runtime.py'))
 
     def test_environment_does_not_inherit_credentials(self):
         with patch.dict(os.environ,{'SECRET_TOKEN':'example','NODE_OPTIONS':'--require untrusted','HTTPS_PROXY':'credential-url'}):
