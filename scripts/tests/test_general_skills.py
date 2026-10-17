@@ -25,7 +25,7 @@ class GeneralSkillsTests(unittest.TestCase):
         )
         manifest = json.loads((PLUGIN / "plugin.json").read_text(encoding="utf-8"))
         self.assertEqual(manifest["name"], "general-skills")
-        self.assertEqual(manifest["version"], "1.1.0")
+        self.assertEqual(manifest["version"], "1.2.0")
         self.assertTrue(manifest["description"])
         self.assertEqual(marketplace["name"], "ios3kov-skills")
         entries = marketplace["plugins"]

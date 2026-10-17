@@ -1,5 +1,9 @@
 # Changelog
 
+## Design-research adoption — 2026-10-17
+
+General Skills 1.2.0 and Product Intelligence 1.0.1 adopt the agreed nine-source practices without copying whole third-party plugins. Add an optional read-only browser measurement helper, source-owned resilience fixtures and an isolated Obscura extraction pilot. No motion quota, aesthetic score, provider API/hooks, account installation, or changes to REA/AS/AE gates. See docs/DESIGN_ADOPTION_2026-10-17.md for source mapping and measured verification limits.
+
 ## Unreleased
 
 Completed bounded REA static-tool qualification: a one-file, immutable export-binding backport over release 6.5.0, a separately identified Linux x64 runtime archive, ten real export-binding cases plus feature/semantic tracing, version comparison and parent-preserving summary checks. Added an executable five-operation entrypoint that verifies the pinned full runtime inventory and preserves raw results; ten offline negative/positive admission tests cover tampering and unsafe paths. Added real Ghidra 12.1.4/Java 21 ELF function/decompile/xrefs checks and macOS app/dylib/DMG checks on source-owned fixtures. Stock 6.5.0 and historical JS-derived Evidence remain quarantined. This is not an official REA release, user-client installation, application certification or runtime/browser-capture rollout. Exact artifacts, hashes, expiry and qualification boundaries are in `integrations/rea/profile.json` and its README.

@@ -17,6 +17,10 @@ Local, offline Python 3.11+ helpers (no network/API keys/third-party dependencie
 
 Templates: examples/reviews.example.csv and examples/features.example.csv. Include source links in actual research; sample placeholders are not evidence.
 
+## Version 1.0.1
+
+Competitor Recon gains optional authorized Refero flow research and explicit no-dataset/no-model-evaluation boundaries. No provider connection is installed; the other skills and four offline helpers are unchanged.
+
 ## Install
 
 Use the plugin marketplace at .agents/plugins/marketplace.json in the parent repository (ios3kov/production-engineering). For Codex: codex plugin marketplace add ios3kov/production-engineering; then /plugins > ios3kov Skills > Product Intelligence > Install. Open a fresh session after installation.

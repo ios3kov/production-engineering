@@ -19,6 +19,12 @@ Use this for an explicitly named competing product or concrete UI/behavior refer
 7. Make a feature matrix with columns: feature,area,priority,original,clone,check_id,notes. Use must/should/could; original yes/no; clone yes/partial/no/skip. Leave clone unverified until tested.
 8. List legal/product exclusions explicitly: licensed datasets, network effects, private integrations, brand marks, partnership rights and data. Measure complexity and the smallest useful differentiated product.
 
+## Optional UI-flow reference source
+
+When relevant, [Refero](https://refero.design/mcp) can supplement public product documentation with a complete registration, payment, settings or recovery flow. Use only an actually available authorized connection or permitted pages; this skill does not bundle that service. Capture sequence, states, platform/date, source and uncertainty, then verify important claims against the named product. Keep the analysis inside the inventory above, not a parallel audit.
+
+Check the [current provider terms](https://doc.refero.design/legal/terms-of-use) before using its material. Keep Refero content out of AI training, fine-tuning, model evaluation, benchmarks and datasets without separate written permission. Ordinary product design does not authorize bulk extraction, redistribution or bypassing a paywall. Without access, use authorized product documentation or user-supplied references and record the gap.
+
 ## Outputs
 Write in the user's chosen destination, default research/competitors/<slug>/recon.md and features.csv. Briefly give scope, screen and flow counts, what is evidenced, hard constraints, and priority gaps. Use existing project acceptance/evidence contracts rather than establishing a second gate.
 

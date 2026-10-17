@@ -26,6 +26,10 @@ Use for thoughtful visual direction and an evidence-based finishing pass across 
 
 For campaigns, covers, posters, product visuals and new visual concepts, read [visual production](references/visual-production.md). It adds subject relevance, a production brief, identity protection, separate concept/execution review and cause-specific repair to the steps above, not a second workflow. Consult [Brainstorming](../brainstorming/SKILL.md) only when concept exploration is needed. For a small correction, use only the relevant repair guidance; do not redesign the work.
 
+## Interface-specific practice
+
+For interactive UI or a product page, use the relevant sections of [interface practice](../../references/interface-practice.md): identify the screen's job, stress real component inputs, compare working variants in a separate preview, preserve drafts through recoverable errors, and separate measured layout defects from taste. Use honest product demonstrations rather than decorative claims. Reuse the workflow above; a small correction does not trigger a full redesign. Sources and explicit exclusions are in [the adoption register](../../references/interface-sources.md).
+
 ## Guardrails
 
 Aesthetic prescriptions are recommendations, not absolute laws. Avoid mandatory multi-question interviews for straightforward work. Never claim 60 fps, accessibility conformance or platform correctness without applicable tests. Don't add dependencies, replace design systems or redesign unrelated pages merely to make them prettier.
