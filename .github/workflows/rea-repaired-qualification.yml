@@ -27,7 +27,7 @@ jobs:
       - uses: actions/setup-java@cf277c60eb25467037889841efdb72551f06f6c3
         with:
           distribution: temurin
-          java-version: '21.0.8+9'
+          java-version: '21.0.8'
       - name: Acquire pinned source without lifecycle scripts
         shell: bash
         run: |
@@ -51,6 +51,7 @@ jobs:
           echo "GHIDRA_INSTALL_DIR=$root/engines/ghidra_12.1.4_PUBLIC" >> "$GITHUB_ENV"
           java -version 2> "$root/output/java-version.txt"
       - name: Build exact corrected source
+        id: build
         shell: bash
         env:
           NODE_OPTIONS: '--max-old-space-size=4096'
@@ -69,7 +70,7 @@ jobs:
           set -euo pipefail
           node integrations/rea/capability-check.mjs
       - name: Focused upstream source regression
-        if: success() || failure()
+        if: (success() || failure()) && steps.build.outcome == 'success'
         shell: bash
         run: |
           set -euo pipefail
