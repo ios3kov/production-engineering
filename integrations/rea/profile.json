@@ -6,16 +6,32 @@
   "reviewed_main_commit": "f85a932d71279415dd95cc30083137d1161f83b8",
   "release_tag": "rea-agents-6.5.0",
   "release_commit": "3b79af28e80785afce9f5998d8f03289402a1847",
-  "activation": "OPT_IN_CLI_FIRST",
+  "activation": "OPT_IN_QUALIFIED_SOURCE_RUNTIME",
   "package_admission": "REQUIRES_EXACT_LOCAL_REVIEW",
-  "qualification": "PER_EXACT_CI_RUN",
+  "qualification": "PER_LOCAL_INSTALL_AND_EXACT_CI_RUN",
   "native_provider": "ghidra",
   "deferred": ["runtime capture", "network captures", "Frida", "debugger consoles", "device management"],
   "product_readiness": "NOT_ASSESSED",
   "quarantine": {
+    "applies_to": "Stock npm 6.5.0 and existing JS-derived reports; legacy adapter.py remains blocked",
     "issue": "https://github.com/morluto/rea/issues/3551",
     "reviewed_at": "2026-10-17",
     "blocked_operations": ["compare-applications", "compare-evidence", "feature-trace", "javascript", "semantic-trace", "view"],
-    "reopen": "Corrected exact package plus real export-binding regression qualification"
+    "reopen": "Do not unquarantine stock 6.5.0; select separately qualified exact source bytes"
+  },
+  "selected_runtime": {
+    "kind": "custom_source_build_not_official_release",
+    "repository": "https://github.com/dakjdakd/rea",
+    "commit": "20643d4a47b0562aa794f0a15903630c62912c80",
+    "upstream_review": "https://github.com/morluto/rea/pull/3552",
+    "reviewed_at": "2026-10-17",
+    "entrypoint": "integrations/rea/runtime.py",
+    "requires": "Successful repair/capability reports and matching local source/dependency/engine/Node hashes",
+    "node": "24.18.0",
+    "tested_java": "Temurin 21.0.8",
+    "ghidra": "12.1.4",
+    "ghidra_archive_sha256": "ddac49f903da9d5bac833e5cc79395098b9c33cfd3279be5f31bd00387d2d4db",
+    "host_lanes": ["Linux x64", "macOS arm64"],
+    "groups": ["package/dependency inventory", "native Ghidra", "static JavaScript", "feature traces", "application comparisons", "retained views"]
   }
 }
