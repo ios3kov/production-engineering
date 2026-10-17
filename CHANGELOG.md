@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+Added optional REA Reference Audit integration under `integrations/rea`: exact rea-agents 6.5.0 selection, a non-executing static command planner, raw-output integrity receipts, 13 offline regression tests and isolated real-CLI qualification on generated ZIP/JavaScript inputs. Full original reports, acquisition metadata and dependency/image identities are retained by the dedicated workflow. General Skills and Product Intelligence are unchanged. No automatic client registration, engine installation, native/iPhone/AE qualification or product-readiness claim; existing local-tool admission and AS/AE Evidence authority remain required.
+
 Clarified task-related diff review and cleanup limited to newly unused code in `references/workflow.md`, preserving indirect entry points, necessary cross-module fixes, validation and user changes. Added a synthetic executable counterexample showing why score-only assertions miss incorrect tie ordering. These are two workflow clarifications and one teaching example, not a new skill, runtime tool, gate or evidence of improved agent behavior. General Skills, Product Intelligence and AS/AE rules are unchanged.
 
 ## 2.0.0

@@ -1,0 +1,73 @@
+name: REA reference qualification
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'integrations/rea/**'
+      - '.github/workflows/rea-reference-smoke.yml'
+permissions:
+  contents: read
+jobs:
+  published-static-cli:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: Acquire exact package in disposable container (no lifecycle scripts)
+        shell: bash
+        run: |
+          set -euo pipefail
+          root="$(mktemp -d "$RUNNER_TEMP/rea-qualification.XXXXXX")"
+          mkdir "$root/runtime" "$root/inputs" "$root/output"
+          echo "REA_TEST_ROOT=$root" >> "$GITHUB_ENV"
+          docker pull node:22.19.0-bookworm
+          image="$(docker image inspect node:22.19.0-bookworm --format '{{.Id}}')"
+          echo "REA_TEST_IMAGE=$image" >> "$GITHUB_ENV"
+          printf '%s\n' "$image" > "$root/output/container-image.txt"
+          docker run --rm --read-only --cap-drop=ALL --security-opt=no-new-privileges \
+            --pids-limit=256 --memory=3g --cpus=2 --tmpfs /tmp:rw,nosuid,nodev,size=1g \
+            --user "$(id -u):$(id -g)" -e HOME=/tmp \
+            --mount "type=bind,src=$root/runtime,dst=/install" \
+            --mount "type=bind,src=$root/output,dst=/out" \
+            "$image" sh -eu -c '
+              npm view --registry=https://registry.npmjs.org rea-agents@6.5.0 version gitHead dist --json > /out/npm-source.json
+              npm install --prefix /install --registry=https://registry.npmjs.org --ignore-scripts --omit=optional --no-audit --no-fund --save-exact rea-agents@6.5.0
+              cp /install/package-lock.json /out/package-lock.json
+            '
+      - name: Generate owned, non-executable test fixtures
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import os,json,zipfile
+          from pathlib import Path
+          base=Path(os.environ['REA_TEST_ROOT'])/'inputs'
+          app=base/'app';app.mkdir()
+          (app/'package.json').write_text(json.dumps({'name':'rea-owned-fixture','version':'1.0.0','type':'module','main':'main.js'}))
+          (app/'main.js').write_text('import { sum } from "./math.js";\nimport { writeFileSync } from "node:fs";\nwriteFileSync("/out/target-executed", "unexpected execution");\nexport const answer = sum(2, 3);\n')
+          (app/'math.js').write_text('export function sum(a, b) { return a + b; }\n')
+          with zipfile.ZipFile(base/'sample.zip','w') as z:
+              for p in sorted(app.iterdir()):z.write(p,p.name)
+          PY
+      - name: Run real upstream static CLI with network disabled
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run --rm --network=none --read-only --cap-drop=ALL \
+            --security-opt=no-new-privileges --pids-limit=256 --memory=3g --cpus=2 \
+            --tmpfs /tmp:rw,nosuid,nodev,size=1g --user "$(id -u):$(id -g)" \
+            --mount "type=bind,src=$REA_TEST_ROOT/runtime,dst=/runtime,readonly" \
+            --mount "type=bind,src=$REA_TEST_ROOT/inputs,dst=/inputs,readonly" \
+            --mount "type=bind,src=$REA_TEST_ROOT/output,dst=/out" \
+            --mount "type=bind,src=$GITHUB_WORKSPACE/integrations/rea/smoke.mjs,dst=/smoke.mjs,readonly" \
+            "$REA_TEST_IMAGE" node /smoke.mjs
+      - name: Retain raw records and exact acquisition identities
+        if: always() && env.REA_TEST_ROOT != ''
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: rea-static-${{ github.sha }}
+          path: ${{ env.REA_TEST_ROOT }}/output/
+          retention-days: 30
+          if-no-files-found: error

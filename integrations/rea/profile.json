@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "package": "rea-agents",
+  "version": "6.5.0",
+  "source_repository": "https://github.com/morluto/rea",
+  "reviewed_main_commit": "f85a932d71279415dd95cc30083137d1161f83b8",
+  "release_tag": "rea-agents-6.5.0",
+  "release_commit": "3b79af28e80785afce9f5998d8f03289402a1847",
+  "activation": "OPT_IN_CLI_FIRST",
+  "package_admission": "REQUIRES_EXACT_LOCAL_REVIEW",
+  "qualification": "PER_EXACT_CI_RUN",
+  "native_provider": "ghidra",
+  "deferred": ["runtime capture", "network captures", "Frida", "debugger consoles", "device management"],
+  "product_readiness": "NOT_ASSESSED"
+}
