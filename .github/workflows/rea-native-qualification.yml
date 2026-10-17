@@ -1,0 +1,99 @@
+name: REA native qualification
+on:
+  workflow_dispatch:
+  push:
+    branches: ['fix/rea-export-binding-qualification']
+    paths: ['integrations/rea/qualify-native.mjs', '.github/workflows/rea-native-qualification.yml']
+permissions:
+  contents: read
+jobs:
+  ghidra:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with: {persist-credentials: false}
+      - name: Acquire verified analysis tools in disposable storage
+        shell: bash
+        run: |
+          set -euo pipefail
+          root="$(mktemp -d "$RUNNER_TEMP/rea-native.XXXXXX")"
+          mkdir "$root/runtime" "$root/inputs" "$root/output" "$root/engine"
+          echo "REA_Q_ROOT=$root" >> "$GITHUB_ENV"
+          test -x "$JAVA_HOME_21_X64/bin/java"
+          "$JAVA_HOME_21_X64/bin/java" -version 2> "$root/output/java-version.txt"
+          curl --fail --location --proto '=https' --tlsv1.2 https://github.com/NationalSecurityAgency/ghidra/releases/download/Ghidra_12.1.4_build/ghidra_12.1.4_PUBLIC_20260921.zip -o "$root/ghidra.zip"
+          echo "ddac49f903da9d5bac833e5cc79395098b9c33cfd3279be5f31bd00387d2d4db  $root/ghidra.zip" | sha256sum --check
+          unzip -q "$root/ghidra.zip" -d "$root/engine"
+          image='node:22.19.0-bookworm@sha256:afff6d8c97964a438d2e6a9c96509367e45d8bf93f790ad561a1eaea926303d9'
+          docker pull "$image"
+          echo "REA_Q_IMAGE=$image" >> "$GITHUB_ENV"
+          printf '%s\n' "$image" > "$root/output/container-image.txt"
+          docker run --rm --read-only --cap-drop=ALL --security-opt=no-new-privileges --memory=3g --pids-limit=256 --cpus=2 --tmpfs /tmp:rw,nosuid,nodev,size=1g --user "$(id -u):$(id -g)" -e HOME=/tmp --mount "type=bind,src=$root/runtime,dst=/runtime" "$image" sh -eu -c 'npm install --prefix /runtime --registry=https://registry.npmjs.org --ignore-scripts --omit=optional --no-audit --no-fund --save-exact rea-agents@6.5.0'
+          cp "$root/runtime/package-lock.json" "$root/output/package-lock.json"
+          printf '%s\n' '__attribute__((noinline)) int rea_sum(int a,int b){return a+b;} int main(void){return rea_sum(2,3);}' > "$root/inputs/fixture.c"
+          docker run --rm --network=none --read-only --cap-drop=ALL --security-opt=no-new-privileges --tmpfs /tmp:rw,nosuid,nodev,size=256m --user "$(id -u):$(id -g)" --mount "type=bind,src=$root/inputs,dst=/inputs" "$image" gcc -O0 -g -fno-inline -no-pie /inputs/fixture.c -o /inputs/fixture
+          sha256sum "$root/inputs/fixture" > "$root/output/fixture.sha256"
+      - name: Real Ghidra function, decompile and reference checks without network
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run --rm --network=none --read-only --cap-drop=ALL --security-opt=no-new-privileges \
+            --pids-limit=512 --memory=6g --cpus=2 --tmpfs /tmp:rw,nosuid,nodev,size=2g \
+            --tmpfs /q/home:rw,nosuid,nodev,size=256m --user "$(id -u):$(id -g)" \
+            -e REA_QUALIFICATION_ROOT=/q -e REA_CANDIDATE_ROOT=/runtime/node_modules/rea-agents \
+            -e REA_QUALIFICATION_LANE=ghidra -e GHIDRA_INSTALL_DIR=/engine/ghidra_12.1.4_PUBLIC -e JAVA_HOME=/java \
+            --mount "type=bind,src=$REA_Q_ROOT/runtime,dst=/runtime,readonly" \
+            --mount "type=bind,src=$REA_Q_ROOT/inputs,dst=/q/inputs,readonly" \
+            --mount "type=bind,src=$REA_Q_ROOT/output,dst=/q/output" \
+            --mount "type=bind,src=$REA_Q_ROOT/engine,dst=/engine,readonly" \
+            --mount "type=bind,src=$JAVA_HOME_21_X64,dst=/java,readonly" \
+            --mount "type=bind,src=$GITHUB_WORKSPACE/integrations/rea/qualify-native.mjs,dst=/qualify.mjs,readonly" \
+            "$REA_Q_IMAGE" node /qualify.mjs
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always() && env.REA_Q_ROOT != ''
+        with:
+          name: rea-ghidra-${{ github.sha }}
+          path: ${{ env.REA_Q_ROOT }}/output/
+          retention-days: 30
+          if-no-files-found: error
+  macos:
+    runs-on: macos-15
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with: {persist-credentials: false}
+      - name: Acquire pinned CLI and build source-owned app and disk image
+        shell: bash
+        run: |
+          set -euo pipefail
+          root="$(mktemp -d "$RUNNER_TEMP/rea-macos.XXXXXX")"
+          mkdir "$root/runtime" "$root/inputs" "$root/output" "$root/home"
+          echo "REA_Q_ROOT=$root" >> "$GITHUB_ENV"
+          node --version > "$root/output/node-version.txt"
+          HOME="$root/home" npm install --prefix "$root/runtime" --registry=https://registry.npmjs.org --ignore-scripts --omit=optional --no-audit --no-fund --save-exact rea-agents@6.5.0
+          cp "$root/runtime/package-lock.json" "$root/output/package-lock.json"
+          app="$root/inputs/Sample.app"
+          mkdir -p "$app/Contents/MacOS" "$app/Contents/Frameworks"
+          printf '%s\n' 'int fixture_value(void){return 42;}' > "$root/inputs/library.c"
+          printf '%s\n' 'extern int fixture_value(void);int main(void){return fixture_value();}' > "$root/inputs/main.c"
+          clang -dynamiclib "$root/inputs/library.c" -install_name @rpath/libfixture.dylib -o "$app/Contents/Frameworks/libfixture.dylib"
+          clang "$root/inputs/main.c" -L"$app/Contents/Frameworks" -lfixture -Wl,-rpath,@executable_path/../Frameworks -o "$app/Contents/MacOS/Sample"
+          /usr/bin/plutil -create xml1 "$app/Contents/Info.plist"
+          /usr/bin/plutil -insert CFBundleExecutable -string Sample "$app/Contents/Info.plist"
+          /usr/bin/plutil -insert CFBundleIdentifier -string test.ios3kov.rea.fixture "$app/Contents/Info.plist"
+          /usr/bin/hdiutil create -quiet -srcfolder "$app" -volname ReaOwnedFixture -format UDZO "$root/inputs/sample.dmg"
+          sw_vers > "$root/output/host-version.txt"
+          shasum -a 256 "$root/inputs/sample.dmg" "$app/Contents/MacOS/Sample" "$app/Contents/Frameworks/libfixture.dylib" > "$root/output/fixture.sha256"
+      - name: Inspect owned bundle, dylibs and real mounted DMG
+        shell: bash
+        run: |
+          set -euo pipefail
+          REA_QUALIFICATION_ROOT="$REA_Q_ROOT" REA_CANDIDATE_ROOT="$REA_Q_ROOT/runtime/node_modules/rea-agents" REA_QUALIFICATION_LANE=macos node integrations/rea/qualify-native.mjs
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always() && env.REA_Q_ROOT != ''
+        with:
+          name: rea-macos-${{ github.sha }}
+          path: ${{ env.REA_Q_ROOT }}/output/
+          retention-days: 30
+          if-no-files-found: error
