@@ -67,7 +67,7 @@ def main():
                             start=time.perf_counter()
                             try:
                                 if mode=='obscura-cold':
-                                    proc=subprocess.run([str(BINARY),'fetch',base+'/'+case,'--allow-private-network','--quiet','--timeout','5','--wait','0','--selector','#ready','--eval','JSON.stringify('+EXPR+')'],capture_output=True,text=True,timeout=12,env={'PATH':'/usr/local/bin:/usr/bin:/bin','HOME':'/tmp','NO_COLOR':'1'})
+                                    proc=subprocess.run([str(BINARY),'fetch',base+'/'+case,'--allow-private-network','--quiet','--timeout','5','--eval','JSON.stringify('+EXPR+')'],capture_output=True,text=True,timeout=12,env={'PATH':'/usr/local/bin:/usr/bin:/bin','HOME':'/tmp','NO_COLOR':'1'})
                                     row['exit_code']=proc.returncode
                                     row['stdout']=proc.stdout;row['stderr']=proc.stderr
                                     value=decode(proc.stdout) if proc.returncode==0 else None
