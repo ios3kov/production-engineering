@@ -1,9 +1,12 @@
 name: REA repaired-source qualification
 on:
   workflow_dispatch:
-  push:
-    branches: ['fix/rea-complete-qualification']
-    paths: ['integrations/rea/**', '.github/workflows/rea-repaired-qualification.yml']
+  pull_request:
+    paths:
+      - 'integrations/rea/runtime.py'
+      - 'integrations/rea/repair-check.mjs'
+      - 'integrations/rea/capability-check.mjs'
+      - '.github/workflows/rea-repaired-qualification.yml'
 permissions:
   contents: read
 concurrency:
