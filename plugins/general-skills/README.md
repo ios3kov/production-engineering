@@ -2,6 +2,10 @@
 
 An optional, cross-project set of eight **independent** Agent Skills. No changes to the existing `production-engineering` skill or the AE/AS project rules are required.
 
+## Version 1.1.0
+
+`brainstorming` gains an optional visual-mechanism library. `genjutsu` gains a scoped production brief, identity/product-truth checks and cause-specific visual repair. Details, acceptance scope and verification limits are in the [changelog](CHANGELOG.md). The other six skills, including `design-dna`, are unchanged. Publishing an update here does not prove that an already installed copy has refreshed; check its version in the supported client.
+
 | Skill | Use when |
 |---|---|
 | `design-dna` | Extracting and applying a design system from visual references |

@@ -1,7 +1,7 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "general-skills",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Eight optional skills for creative direction, visual design, motion, GSAP, Three.js, brainstorming, deep research and claim verification in ChatGPT Work and Codex.",
   "extensions": {
     "com.openai": {

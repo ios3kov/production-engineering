@@ -22,6 +22,10 @@ Identify one of two states:
 5. For each viable candidate, explain in one or two sentences: unusual insight, intended user, why it might work, biggest assumption and cheapest validation.
 6. Let the user select an axis or candidate before moving into detailed execution, unless they asked for a finished recommendation.
 
+## Visual ideation only
+
+For visual ideation only, consult [visual mechanisms](references/visual-mechanisms.md) when a new concept is needed. Use selected mechanisms to vary meaning, not just palettes. The library is optional: do not run all ten, force three concepts for a typo, or impose a poster treatment on an interface. Keep user preferences and approved campaign systems. Continue the existing exploration/selection workflow above, rather than starting a second one. For production and critique, hand off to [Genjutsu](../genjutsu/SKILL.md).
+
 ## Quality gate
 
 Ask: would independent people generate essentially the same list? If yes, deliberately reframe. Label speculative novelty as speculative. When the user asks whether something is genuinely new or exists on the market, research competitors rather than asserting originality.
@@ -31,3 +35,5 @@ Be concise, concrete and varied; use a short shortlist rather than pages of gene
 ## Source
 
 Adapted from [jwynia/agent-skills brainstorming](https://github.com/jwynia/agent-skills/tree/main/skills/general/ideation/brainstorming).
+
+The optional visual library is an original formulation of the agreed additions; its source and limits are documented in [visual mechanisms](references/visual-mechanisms.md).
