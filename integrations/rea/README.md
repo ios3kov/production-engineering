@@ -1,136 +1,84 @@
 # REA: optional Reference Audit integration
 
-## Admission correction — 2026-10-17
+Use for an explicitly selected shipped artifact, native function or external product contract. Do not load REA for ordinary source-repository development. Existing AS/AE Reference Audit, target authorization, local-tool admission, Evidence and release gates remain authoritative.
 
-**REA 6.5.0 JavaScript analysis is QUARANTINED**, based on the upstream
-[reproduction of missing CommonJS exports](https://github.com/morluto/rea/issues/3551).
-Renamed Webpack factory parameters can lose exports while the result reports
-exact/complete coverage. Our simple fixture smoke did not cover this defect.
-Do not admit 6.5.0 JS/export facts as authoritative, even with exit zero or
-complete coverage. The planner now returns BLOCKED for JavaScript analysis,
-feature/semantic traces, application comparisons, generic retained views and
-Evidence comparisons (which can inherit JS facts). This conservatively blocks
-mixed/unknown-origin workflows rather than claiming a reliable bundle detector.
-No bypass switch is provided. Package inventory is not JS export recovery;
-that lane and explicit native/Ghidra plans retain their existing separate checks.
+## Current decision — 2026-10-17
 
-To reopen the lane, select a corrected immutable package, review its exact
-bytes and run a real regression covering renamed module/export parameters and
-shadowed bindings through the installed interface. A pending upstream patch or
-an unchanged version label is not sufficient. Earlier ZIP/JS/summary smoke
-results remain historical narrow fixture observations, not production admission.
-The original capability shortlist below is retained as planned scope, not a
-claim that all listed operations are currently admitted.
+**Stock rea-agents 6.5.0 JS analysis remains quarantined.** The release can lose CommonJS exports when a Webpack module receiver is renamed and invent exports from a shadowed receiver ([issue 3551](https://github.com/morluto/rea/issues/3551)). The earlier toy smoke did not establish correctness at that boundary.
 
-Use only for an explicitly selected shipped artifact, package, native function,
-or observed external product contract. Ordinary source development does not
-load or run REA. The existing AS/AE Reference Audit, ownership rules, local
-executable admission, Evidence lifecycle and release gates remain authoritative.
+A separate source-built runtime, **`rea-6.5.0-patch3552.1`**, is now qualified for the five static operations below. It is **not an official upstream release**. It applies one inspected production-file correction from [PR 3552](https://github.com/morluto/rea/pull/3552) to the fixed 6.5.0 release. Neither a pending PR nor a version label was accepted as proof: the actual baseline defect, corrected exports and derived workflows were executed and checked.
 
-## Scope and version
+`adapter.py` retains its conservative stock-package quarantine. `qualified.py` is a separate executable entrypoint: it verifies all 7,501 files/links in the externally pinned runtime manifest before invoking one allowed operation. A mismatching, modified or stock installation is refused. It never installs software or edits client configuration. This is file-integrity checking, not an OS sandbox or producer authentication.
 
-Use the official `morluto/rea` project and **rea-agents 6.5.0**, never `@latest`
-in a persistent registration or CI. The reviewed main source was
-`f85a932d71279415dd95cc30083137d1161f83b8`; the 6.5.0 GitHub release points at
-`3b79af28e80785afce9f5998d8f03289402a1847`. These are distinct identities.
-The qualification workflow records actual registry `gitHead`, tarball integrity,
-dependency lock, package entry digest and container image ID. A version string
-alone is not a complete executable-package pin or proof of source equivalence.
+## Six selected groups and executed scope
 
-First integration is **CLI-first**, with no automatic client configuration,
-new general-purpose skill, full MCP registration, engine installation or global
-package update. Runtime qualification is separate from repository integration.
-The local `adapter.py` is an offline planner/receipt helper, not a REA substitute,
-a command runner, or a security sandbox.
-
-## Selected capabilities
-
-| Block | Selected REA interface | Qualification boundary |
+| Group | Actual interface and checks | Remaining boundary |
 | --- | --- | --- |
-| Packages/dependencies | `inspect-artifact`; MCP `trace_dylib_resolution` after explicit artifact selection | ZIP smoke; real macOS DMG mounting and dylib resolution need macOS checks |
-| Native analysis | `analyze`, `function`, `decompile`, `xrefs`, explicitly `--provider ghidra` | Requires compatible Java/Ghidra and actual target-format tests; no automatic Windows/Mac portability claim |
-| JS/Electron static | `analyze-javascript-application` on a supplied tree or ASAR | Owned JS fixture; Electron runtime and AE panel compatibility are separate |
-| Feature investigation | `trace-application-feature`, `trace-javascript-semantics` on full saved Evidence requests | Discover installed schema; static reachability is not execution |
-| Version comparison | `compare`, `compare-application-versions`; MCP `compare_artifacts`/`compare_functions` when advertised | Keep both source digests, engine identities and unknowns; not regression certification |
-| Focused result retrieval | `inspect-analysis-view` and original full Evidence | Summary smoke; preserve full parent, coverage, limitations and unsupported fields |
+| Packages/dependencies | Real `inspect-artifact` ZIP; macOS `.app` and mounted DMG; `trace-dylib-resolution` resolved the owned library | Not arbitrary package/signature acceptance or proof of runtime loading |
+| Native/Ghidra | Real Ghidra 12.1.4 + Java 21: named ELF function, callers, assembly, decompilation and xrefs | Linux x64 fixture; other binary formats/ABIs and Windows need task-specific checks |
+| Static JS/Electron | Corrected CLI recovered ten expected Webpack/CommonJS export cases, including renamed/default/shadowed/empty/default exports | Static bundle fixture, not a running Electron app or AE panel |
+| Feature investigation | Real positive and no-match feature traces; semantic trace preserving exact seed and source identity | Reachability and inferred relations are not observed execution |
+| Version comparison | Real comparison detected the deliberately changed module and retained both artifact identities | Application graph comparison only; generic/function comparison modes are not claimed qualified |
+| Focused retrieval | Real summary from complete parent Evidence, preserving parent and subject identity | Summary delivery does not prove smaller analysis cost or complete application coverage |
 
-Browser/Electron/native runtime captures and saved traffic analysis are deferred.
-No Frida, debugger console, generic process launch, device management, extraction,
-setup/update, arbitrary shell or network-capture command is in the planner.
-MCP-specific operations above remain manual, task-scoped candidates; the planner
-does not pretend to implement or test them.
+Corrected Linux checks: [run 39031000276](https://github.com/ios3kov/production-engineering/actions/runs/39031000276), commit `ffec5d4bb53e1b4b80633f55d23b1170f64bb9e7`. Eight real CLI cases include ten binding variants. The baseline's wrong result is a successful **defect reproduction**, not approval of baseline behavior. The corrected fixture's target-execution sentinel remained absent.
 
-## Practical use
+Native/macOS checks: [run 39030583850](https://github.com/ios3kov/production-engineering/actions/runs/39030583850), commit `022af1495ecfa3cab43ef8080faf09f1d3bf8950`. Three Ghidra and three macOS checks passed. These separate unaffected lanes used the published 6.5.0 package: Linux x64 Node 22.19.0; macOS arm64 Node 22.23.2. The JS patch's presence is not inferred for those installations.
 
-1. Review exact package bytes and dependencies through the existing local-tool
-   admission process. Use a private, owned installation or isolated image.
-   Preserve upstream MIT and third-party notices in that installation; this
-   integration does not redistribute the upstream code. No `curl | sh` or
-   automatic native helper/engine installation is required.
-2. Probe the **actual installed CLI** with `rea --version` and relevant command
-   `--help`; probe Ghidra only for a native task. Record the supported commands
-   in a reviewed `catalog.json`, e.g. `{"commands":["inspect-artifact"]}`.
-   That handoff file is a declaration, not automatic proof of a capability.
-3. Generate a bounded task plan with an explicit local input:
+## Immutable corrected runtime
 
-   ```sh
-   python3 integrations/rea/adapter.py plan inventory /absolute/input.zip --catalog /absolute/catalog.json
-   python3 integrations/rea/adapter.py plan native-function /absolute/plugin --selector RenderMain --catalog /absolute/catalog.json
-   ```
+The machine-readable identities and exact archive reference are in [profile.json](profile.json):
 
-   `argv` is a list, not a shell command. The planner never executes it. Without
-   a matching advertised command it returns BLOCKED and exit 2. Even a supported
-   command still requires host/package/target authorization and appropriate
-   isolation. Do not turn the planner's allowlist into a claim of enforcement
-   against direct REA calls.
-4. Run only the reviewed operation in the already authorized environment.
-   Retain complete stdout, stderr, exit status, build/tool identity and target
-   digest. For a directory, use REA's recorded artifact digest and verify its
-   inventory; do not invent a directory hash by hashing its path.
-5. Attach an integrity receipt without rewriting the original result:
+- Release source: `3b79af28e80785afce9f5998d8f03289402a1847`.
+- Reviewed correction: `dakjdakd/rea@20643d4a47b0562aa794f0a15903630c62912c80`, only `src/domain/javascript/javascriptAstFingerprint.ts`; original blob `1dee83fa054b881409f9c321e74830e3b75239a2`, corrected blob `cf3f9aca413a00ebf5a5b8e4a5c94999776506ce`.
+- Manifest SHA-256: `b3ba3f9f4806d7decaa8df1187b8c519d2ae1f37d29d7c652b60429aa6789c11`.
+- Runtime tarball SHA-256: `0b08bf4babb85ad43bd8607d0d2cf890bcf82cd443e806f47069f0c7a96f0529`.
+- Linux x64, Node `v22.19.0`; pinned image `node:22.19.0-bookworm@sha256:afff6d8c97964a438d2e6a9c96509367e45d8bf93f790ad561a1eaea926303d9`.
 
-   ```sh
-   python3 integrations/rea/adapter.py receipt /absolute/raw.json --exit-code 0 --subject-sha256 ACTUAL_SHA256 --package-version 6.5.0
-   ```
+The [qualified artifact](https://github.com/ios3kov/production-engineering/actions/runs/39031000276/artifacts/12100024122) contains the runtime tarball, manifest, patch, notices, dependency identities and raw regression results. GitHub retention ends **2026-11-16**; preserve the verified archive in an approved local evidence/runtime store before relying on it long-term. Expiry is not permission to download `latest` or accept an unverified rebuild. The source recipe is retained in `.github/workflows/rea-corrected-qualification.yml`; a different resulting manifest requires requalification and a reviewed pin update.
 
-   This returns NEEDS_REVIEW, **never PASS/product-ready**. Review the actual REA
-   schema, subject identity, partial coverage, contradictions, inferred facts,
-   unknowns and cleanup failures; map only justified facts into the existing
-   reference observations/check records. Nonzero execution remains incomplete.
-   Hash matching cannot authenticate a producer or self-reported PASS.
+Acquisition disables lifecycle scripts. Build and qualification run without network in distinct limited containers; development and optional dependencies are pruned before the actual qualified runtime is tested and packaged. Upstream MIT and separate third-party notices remain in the runtime. No upstream implementation is vendored into these repository instructions.
 
-Large result files stay local; use the upstream full-record-to-summary workflow
-rather than sending a complete app or sensitive source to an AI provider.
-Do not upload licensed/proprietary targets, secrets or personal captures to
-GitHub Actions. This repository's hosted test uses generated fixtures only.
+## Use the corrected static entrypoint
 
-## Qualification and activation
+After reviewing and obtaining the exact archive, verify its ZIP/tarball/manifest hashes from `profile.json`, then extract into a new owned directory. Do not execute it during extraction. Use the pinned Linux container with runtime and inputs mounted read-only, network disabled, no host credentials/home, dropped capabilities and bounded memory/CPU/PIDs, following `.github/workflows/rea-runner-qualification.yml`.
 
-- `scripts/tests/test_rea_adapter.py`: offline planner/receipt regression tests.
-- `REA reference qualification`: installs exact npm 6.5.0 with lifecycle scripts
-  disabled and optional dependencies omitted **in a disposable acquisition
-  container**. It then runs the real upstream CLI against an owned ZIP and JS
-  tree in a **different network-disabled/read-only container**, with read-only
-  inputs, no host home/credentials, memory/CPU/PID limits and only an output mount.
-- The image tag is resolved once to its content ID per run and that same ID is
-  retained and used for acquisition/execution. Registry metadata and the resolved
-  dependency lock are retained. This is an isolated candidate qualification,
-  not independent full-package admission for production use.
-- Raw records and the final result are attached to the exact CI run for 30 days.
-  Expiry ends that remote retention; archive reviewed records in the project's
-  existing evidence store before relying on them long-term.
-- A passing synthetic smoke establishes only those operations on that package,
-  image and fixture. It does not validate native Ghidra, Mac DMG mounting,
-  application behavior, physical iPhone/AE runtime, or all six blocks.
-- No installed Work/Codex copy or client configuration is changed by this repo.
-  Actual tools must appear in that client's session before claiming activation.
-  Later MCP activation requires reviewed tool filtering and host isolation;
-  upstream `readOnlyHint`/`destructiveHint` are descriptions, not access controls.
+Inside that prepared environment:
 
-## Sources
+```sh
+python3 /integration/qualified.py verify --runtime-root /runtime --manifest /manifest.json
+python3 /integration/qualified.py run --runtime-root /runtime --manifest /manifest.json --operation javascript --input /inputs/app --output /out/new-analysis
+```
 
-[REA 6.5.0 release](https://github.com/morluto/rea/releases/tag/rea-agents-6.5.0),
-[reviewed CLI](https://github.com/morluto/rea/blob/f85a932d71279415dd95cc30083137d1161f83b8/docs/cli.md),
-[installation boundaries](https://github.com/morluto/rea/blob/f85a932d71279415dd95cc30083137d1161f83b8/docs/installation.md),
-[JS workflow contracts](https://github.com/morluto/rea/blob/f85a932d71279415dd95cc30083137d1161f83b8/docs/javascript-application-workflows.md).
-Original adapter/docs/tests; no copied upstream implementation or new AS/AE policy.
+Allowed operations are `javascript`, `view`, `feature-trace`, `semantic-trace` and `compare-applications`. The last four take an explicit JSON request with **complete newly collected corrected-runtime Evidence**, not a stale summary or a retained ID from another CLI process. Do not relabel old 6.5.0 observations as corrected. The runner does not infer the authenticity of embedded Evidence; its provenance remains an existing reviewed Evidence requirement.
+
+Outputs are complete `stdout.json`, `stderr.txt` and `receipt.json` under a new directory. Files are not overwritten. A process timeout or nonzero exit is incomplete. An exit-zero receipt says **NEEDS_REVIEW**, never application PASS: inspect subject identity, coverage, contradictions, unknowns, inferred relationships and cleanup failures. Larger-than-profile requests must use a separately reviewed bounded workflow, not truncate facts to obtain success.
+
+The runner does not provide network isolation itself. Changing Node, dependencies, runtime bytes or host conditions can invalidate qualification. File checks cannot stop concurrent mutation; keep the admitted runtime immutable/read-only throughout execution.
+
+## Native and package lane
+
+For a separately admitted published CLI, the existing offline planner remains available:
+
+```sh
+python3 integrations/rea/adapter.py plan inventory /absolute/input.zip --catalog /absolute/catalog.json
+python3 integrations/rea/adapter.py plan native-function /absolute/plugin --selector RenderMain --catalog /absolute/catalog.json
+```
+
+The catalog lists commands observed in the actual installation, e.g. `{"commands":["inspect-artifact","function"]}`; it is not an automatic capability probe. The planner emits argv and checks, not execution authorization. Follow the admitted real CLI contracts, including explicit `--provider ghidra` for native queries. macOS dependency analysis also has a CLI: `rea trace-dylib-resolution /absolute/Sample.app --json`.
+
+Ghidra distribution 12.1.4 was verified against SHA-256 `ddac49f903da9d5bac833e5cc79395098b9c33cfd3279be5f31bd00387d2d4db` before extraction into disposable storage. Compatible Java and actual target-format checks remain necessary on each host. No engine is silently installed on the user's machine.
+
+## Boundaries and activation
+
+The six groups now have executable integration or real CLI qualification at the stated fixture/host boundaries. This does **not** prove a user's application, AE plugin, physical iPhone, Windows installation or live Electron session works. Those are separate target-specific checks.
+
+Runtime/browser capture, traffic analysis, Frida, debugger consoles, device management and arbitrary shell/MCP commands remain deferred. Neither runner nor a passing smoke authorizes those operations. Large or sensitive output stays in the approved local store; never upload proprietary targets, secrets or personal captures to these public hosted jobs. Only generated fixtures are used here.
+
+Repository publication is not installation or activation in Work/Codex. These workflows build and execute on isolated CI hosts, not the user's computer. A real supported client connection must be verified separately; MCP annotations are descriptions, not access controls. General Skills, Product Intelligence and existing application release gates are unchanged.
+
+## Maintenance and provenance
+
+Retain exact run/revision/environment, raw output, archive hashes, patch and license. Offline tests in `scripts/tests/test_rea_adapter.py` and `test_rea_qualified.py` check admission logic and negative cases, not actual model behavior. The three named qualification workflows perform real tool checks; their status must be read for the exact candidate.
+
+Sources: [REA release](https://github.com/morluto/rea/releases/tag/rea-agents-6.5.0), [reviewed correction](https://github.com/dakjdakd/rea/blob/20643d4a47b0562aa794f0a15903630c62912c80/src/domain/javascript/javascriptAstFingerprint.ts), [CLI contracts](https://github.com/morluto/rea/blob/3b79af28e80785afce9f5998d8f03289402a1847/docs/cli.md), [Apple package contracts](https://github.com/morluto/rea/blob/3b79af28e80785afce9f5998d8f03289402a1847/docs/apple-application-analysis.md), [Ghidra distribution](https://github.com/NationalSecurityAgency/ghidra/releases/tag/Ghidra_12.1.4_build). Recheck changed dependencies and target-specific facts before adopting updates; do not substitute current main for a reviewed runtime.
