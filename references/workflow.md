@@ -5,6 +5,8 @@ Record objective, actor and job-to-be-done, current vs desired behavior, constra
 
 For large ambiguous work, keep a map: unknown → evidence required → dependency → next decision. Distinguish prototype from production: the former answers one question and carries explicit disposal/reuse criteria.
 
+For an explicitly selected shipped artifact or external product contract, the [optional REA integration](../integrations/rea/README.md) supplies pinned static-analysis workflows and raw-result receipts. Use existing Reference Audit and local-tool admission; do not run REA for ordinary source-repository work, install engines implicitly, or treat static analysis as product/runtime acceptance.
+
 ## 2. Specification and design
 Use specs/<feature>/spec.md, plan.md, tasks.md if established; preserve identifiers.
 
