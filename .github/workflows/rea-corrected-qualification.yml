@@ -1,0 +1,105 @@
+name: REA corrected qualification
+on:
+  workflow_dispatch:
+  push:
+    branches: ['fix/rea-export-binding-qualification']
+    paths: ['integrations/rea/qualify-bindings.mjs', '.github/workflows/rea-corrected-qualification.yml']
+permissions:
+  contents: read
+jobs:
+  corrected-static-cli:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: Acquire immutable source and reviewed one-file correction
+        shell: bash
+        run: |
+          set -euo pipefail
+          root="$(mktemp -d "$RUNNER_TEMP/rea-corrected.XXXXXX")"
+          echo "REA_Q_ROOT=$root" >> "$GITHUB_ENV"
+          mkdir "$root/source" "$root/baseline" "$root/output" "$root/inputs"
+          git -C "$root/source" init -q
+          git -C "$root/source" remote add origin https://github.com/morluto/rea.git
+          git -C "$root/source" fetch --depth=1 origin 3b79af28e80785afce9f5998d8f03289402a1847
+          git -C "$root/source" checkout --detach FETCH_HEAD
+          test "$(git -C "$root/source" rev-parse HEAD)" = 3b79af28e80785afce9f5998d8f03289402a1847
+          file=src/domain/javascript/javascriptAstFingerprint.ts
+          test "$(git -C "$root/source" hash-object "$file")" = 1dee83fa054b881409f9c321e74830e3b75239a2
+          curl --fail --location --proto '=https' --tlsv1.2 https://raw.githubusercontent.com/dakjdakd/rea/20643d4a47b0562aa794f0a15903630c62912c80/src/domain/javascript/javascriptAstFingerprint.ts -o "$root/correction.ts"
+          test "$(git hash-object "$root/correction.ts")" = cf3f9aca413a00ebf5a5b8e4a5c94999776506ce
+          cp "$root/correction.ts" "$root/source/$file"
+          git -C "$root/source" diff --check
+          git -C "$root/source" diff -- "$file" > "$root/output/source-correction.patch"
+          cp "$root/source/LICENSE" "$root/output/REA-LICENSE"
+          printf '%s\n' 'release=3b79af28e80785afce9f5998d8f03289402a1847' 'correction=20643d4a47b0562aa794f0a15903630c62912c80' 'corrected_blob=cf3f9aca413a00ebf5a5b8e4a5c94999776506ce' > "$root/output/source-identity.txt"
+      - name: Acquire dependencies without lifecycle scripts
+        shell: bash
+        run: |
+          set -euo pipefail
+          image='node:22.19.0-bookworm@sha256:afff6d8c97964a438d2e6a9c96509367e45d8bf93f790ad561a1eaea926303d9'
+          docker pull "$image"
+          echo "REA_Q_IMAGE=$image" >> "$GITHUB_ENV"
+          printf '%s\n' "$image" > "$REA_Q_ROOT/output/container-image.txt"
+          docker run --rm --read-only --cap-drop=ALL --security-opt=no-new-privileges \
+            --pids-limit=512 --memory=6g --cpus=2 --tmpfs /tmp:rw,nosuid,nodev,size=2g \
+            --user "$(id -u):$(id -g)" -e HOME=/tmp \
+            --mount "type=bind,src=$REA_Q_ROOT,dst=/q" "$image" sh -eu -c '
+              cd /q/source
+              npm ci --ignore-scripts --no-audit --no-fund
+              npm install --prefix /q/baseline --registry=https://registry.npmjs.org --ignore-scripts --omit=optional --no-audit --no-fund --save-exact rea-agents@6.5.0
+              cp /q/source/package-lock.json /q/output/source-package-lock.json
+              cp /q/baseline/package-lock.json /q/output/baseline-package-lock.json
+              npm view --registry=https://registry.npmjs.org rea-agents@6.5.0 version gitHead dist --json > /q/output/baseline-npm.json
+            '
+      - name: Compile corrected source and remove development dependencies offline
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run --rm --network=none --read-only --cap-drop=ALL --security-opt=no-new-privileges \
+            --pids-limit=512 --memory=6g --cpus=2 --tmpfs /tmp:rw,nosuid,nodev,size=2g \
+            --user "$(id -u):$(id -g)" -e HOME=/tmp -e TURBO_TELEMETRY_DISABLED=1 \
+            --mount "type=bind,src=$REA_Q_ROOT/source,dst=/source" \
+            "$REA_Q_IMAGE" sh -eu -c 'cd /source; npm run build:cached; npm prune --omit=dev --omit=optional --ignore-scripts --offline --no-audit --no-fund'
+      - name: Run baseline and corrected regression with network disabled
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run --rm --network=none --read-only --cap-drop=ALL --security-opt=no-new-privileges \
+            --pids-limit=512 --memory=6g --cpus=2 --tmpfs /tmp:rw,nosuid,nodev,size=2g \
+            --user "$(id -u):$(id -g)" \
+            -e REA_QUALIFICATION_ROOT=/q -e REA_CANDIDATE_ROOT=/candidate \
+            -e REA_BASELINE_ROOT=/baseline/node_modules/rea-agents \
+            --mount "type=bind,src=$REA_Q_ROOT/inputs,dst=/q/inputs" \
+            --mount "type=bind,src=$REA_Q_ROOT/output,dst=/q/output" \
+            --mount "type=bind,src=$REA_Q_ROOT/source,dst=/candidate,readonly" \
+            --mount "type=bind,src=$REA_Q_ROOT/baseline,dst=/baseline,readonly" \
+            --mount "type=bind,src=$GITHUB_WORKSPACE/integrations/rea/qualify-bindings.mjs,dst=/qualify.mjs,readonly" \
+            --tmpfs /q/home:rw,nosuid,nodev,size=256m \
+            "$REA_Q_IMAGE" node /qualify.mjs
+      - name: Pack only the qualified runtime files
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json,os,pathlib,tarfile,hashlib
+          root=pathlib.Path(os.environ['REA_Q_ROOT'])
+          manifest=json.loads((root/'output/runtime-manifest.json').read_text())
+          target=root/'output/rea-corrected-linux-x64.tar.gz'
+          with tarfile.open(target,'w:gz',dereference=False) as archive:
+              for entry in manifest['entries']:
+                  archive.add(root/'source'/entry['path'],arcname=entry['path'],recursive=False)
+          with target.open('rb') as f: digest=hashlib.file_digest(f,'sha256').hexdigest()
+          (root/'output/runtime-archive.sha256').write_text(digest+'  '+target.name+'\n')
+          print('Qualified runtime archive SHA-256: '+digest)
+          PY
+      - name: Retain exact regression outputs and source identity
+        if: always() && env.REA_Q_ROOT != ''
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: rea-corrected-${{ github.sha }}
+          path: ${{ env.REA_Q_ROOT }}/output/
+          retention-days: 30
+          if-no-files-found: error

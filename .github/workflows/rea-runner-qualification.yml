@@ -1,0 +1,82 @@
+name: REA admitted runner qualification
+on:
+  workflow_dispatch:
+  push:
+    branches: ['fix/rea-export-binding-qualification']
+    paths: ['integrations/rea/qualified.py', 'integrations/rea/profile.json', '.github/workflows/rea-runner-qualification.yml']
+permissions:
+  contents: read
+  actions: read
+jobs:
+  archived-runtime:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with: {persist-credentials: false}
+      - name: Retrieve the exact previously qualified archive
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          root="$(mktemp -d "$RUNNER_TEMP/rea-runner.XXXXXX")"
+          echo "REA_RUNNER_ROOT=$root" >> "$GITHUB_ENV"
+          mkdir "$root/runtime" "$root/inputs" "$root/output"
+          gh api /repos/ios3kov/production-engineering/actions/artifacts/12100024122/zip > "$root/qualification.zip"
+          ROOT="$root" python3 - <<'PY'
+          import os,json,hashlib,zipfile,tarfile
+          from pathlib import Path
+          root=Path(os.environ['ROOT'])
+          profile=json.loads(Path('integrations/rea/profile.json').read_text())['corrected_runtime']
+          def digest(p):
+              with p.open('rb') as f:return hashlib.file_digest(f,'sha256').hexdigest()
+          assert digest(root/'qualification.zip')==profile['evidence_archive_sha256']
+          with zipfile.ZipFile(root/'qualification.zip') as z:
+              for name in ('runtime-manifest.json','rea-corrected-linux-x64.tar.gz'):
+                  (root/name).write_bytes(z.read(name))
+          assert digest(root/'runtime-manifest.json')==profile['manifest_sha256']
+          assert digest(root/'rea-corrected-linux-x64.tar.gz')==profile['archive_sha256']
+          with tarfile.open(root/'rea-corrected-linux-x64.tar.gz') as t:
+              t.extractall(root/'runtime',filter='data')
+          (root/'inputs/bundle.js').write_text('globalThis.webpackChunkApp.push([[1], {17(e,t){e.exports={parse:v=>v}; {const module={exports:{}};module.exports.fake=1;}}}]);\n')
+          (root/'output/acquisition.json').write_text(json.dumps({'runtime_id':profile['runtime_id'],'manifest_sha256':profile['manifest_sha256'],'archive_sha256':profile['archive_sha256'],'upstream_artifact_id':profile['artifact_id']}))
+          PY
+          docker pull node:22.19.0-bookworm@sha256:afff6d8c97964a438d2e6a9c96509367e45d8bf93f790ad561a1eaea926303d9
+      - name: Verify all runtime files and execute the scoped entrypoint without network
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run --rm --network=none --read-only --cap-drop=ALL --security-opt=no-new-privileges \
+            --pids-limit=256 --memory=3g --cpus=2 --tmpfs /tmp:rw,nosuid,nodev,size=512m \
+            --user "$(id -u):$(id -g)" \
+            --mount "type=bind,src=$REA_RUNNER_ROOT/runtime,dst=/runtime,readonly" \
+            --mount "type=bind,src=$REA_RUNNER_ROOT/runtime-manifest.json,dst=/manifest.json,readonly" \
+            --mount "type=bind,src=$REA_RUNNER_ROOT/inputs,dst=/inputs,readonly" \
+            --mount "type=bind,src=$REA_RUNNER_ROOT/output,dst=/out" \
+            --mount "type=bind,src=$GITHUB_WORKSPACE/integrations/rea,dst=/integration,readonly" \
+            node:22.19.0-bookworm@sha256:afff6d8c97964a438d2e6a9c96509367e45d8bf93f790ad561a1eaea926303d9 \
+            python3 /integration/qualified.py run --runtime-root /runtime --manifest /manifest.json --operation javascript --input /inputs --output /out/replay
+          ROOT="$REA_RUNNER_ROOT" python3 - <<'PY'
+          import json,os
+          from pathlib import Path
+          p=Path(os.environ['ROOT'])/'output/replay'
+          receipt=json.loads((p/'receipt.json').read_text())
+          assert receipt['exit_code']==0 and receipt['analysis_status']=='NEEDS_REVIEW'
+          evidence=json.loads((p/'stdout.json').read_text())
+          exports=[]
+          for n in evidence['normalized_result']['graph']['nodes']:
+              for o in n['observations']:
+                  if o['properties'].get('module_key')=='17':exports.append(o['properties']['exports'])
+          assert exports==[['parse']], exports
+          result={'status':'PASS','scope':'Exact archived runtime, qualified.py execution, renamed module receiver and shadow exclusion','product_readiness':'NOT_ASSESSED','evidence_id':evidence['evidence_id']}
+          (p.parent/'runner-report.json').write_text(json.dumps(result,indent=2))
+          print(json.dumps(result))
+          PY
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always() && env.REA_RUNNER_ROOT != ''
+        with:
+          name: rea-runner-${{ github.sha }}
+          path: ${{ env.REA_RUNNER_ROOT }}/output/
+          retention-days: 30
+          if-no-files-found: error
