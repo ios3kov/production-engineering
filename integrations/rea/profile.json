@@ -16,6 +16,37 @@
     "issue": "https://github.com/morluto/rea/issues/3551",
     "reviewed_at": "2026-10-17",
     "blocked_operations": ["compare-applications", "compare-evidence", "feature-trace", "javascript", "semantic-trace", "view"],
-    "reopen": "Corrected exact package plus real export-binding regression qualification"
+    "scope": "Stock npm 6.5.0 and historical JS-derived Evidence remain blocked by adapter.py",
+    "reopen": "Only the separately qualified corrected runtime below is admitted through qualified.py; no version-only bypass"
+  },
+  "corrected_runtime": {
+    "runtime_id": "rea-6.5.0-patch3552.1",
+    "official_release": false,
+    "platform": "linux",
+    "architecture": "x64",
+    "node": "v22.19.0",
+    "release_commit": "3b79af28e80785afce9f5998d8f03289402a1847",
+    "patch_repository": "dakjdakd/rea",
+    "patch_commit": "20643d4a47b0562aa794f0a15903630c62912c80",
+    "patch_file": "src/domain/javascript/javascriptAstFingerprint.ts",
+    "patch_blob": "cf3f9aca413a00ebf5a5b8e4a5c94999776506ce",
+    "manifest_sha256": "b3ba3f9f4806d7decaa8df1187b8c519d2ae1f37d29d7c652b60429aa6789c11",
+    "archive_sha256": "0b08bf4babb85ad43bd8607d0d2cf890bcf82cd443e806f47069f0c7a96f0529",
+    "evidence_archive_sha256": "e4afb2184db2ac481b012ff51d4cc9c713393c9bd230f397a3a4ef9a3178c24a",
+    "container_image": "node:22.19.0-bookworm@sha256:afff6d8c97964a438d2e6a9c96509367e45d8bf93f790ad561a1eaea926303d9",
+    "qualification_run": 39031000276,
+    "qualification_commit": "ffec5d4bb53e1b4b80633f55d23b1170f64bb9e7",
+    "artifact_id": 12100024122,
+    "artifact_expires_at": "2026-11-16T12:04:12Z",
+    "qualified_operations": ["javascript", "view", "feature-trace", "semantic-trace", "compare-applications"],
+    "scope": "Eight real CLI cases on owned fixtures, including ten export-binding cases; not arbitrary-application or client activation certification"
+  },
+  "native_qualification": {
+    "run_id": 39030583850,
+    "commit": "022af1495ecfa3cab43ef8080faf09f1d3bf8950",
+    "package": "rea-agents@6.5.0",
+    "ghidra": "12.1.4",
+    "ghidra_archive_sha256": "ddac49f903da9d5bac833e5cc79395098b9c33cfd3279be5f31bd00387d2d4db",
+    "scope": "Real Linux x64 ELF function/decompile/xrefs; real macOS arm64 app/dylib/DMG fixtures. Native code and package inventory do not use the quarantined JS collector."
   }
 }
