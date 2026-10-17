@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+Clarified task-related diff review and cleanup limited to newly unused code in `references/workflow.md`, preserving indirect entry points, necessary cross-module fixes, validation and user changes. Added a synthetic executable counterexample showing why score-only assertions miss incorrect tie ordering. These are two workflow clarifications and one teaching example, not a new skill, runtime tool, gate or evidence of improved agent behavior. General Skills, Product Intelligence and AS/AE rules are unchanged.
+
 ## 2.0.0
 
 Added a whole-product readiness coordinator with ten-domain passports, deterministic coverage plans, source/artifact/environment binding, evidence expiry, manual versus automated provenance, issue retests and expiring exceptions. Bounded offline JSON input rejects duplicate keys; no project commands execute. Existing scanner CLI contracts remain available. Runtime collectors remain external and evidence authenticity is the trusted runner's responsibility.

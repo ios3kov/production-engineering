@@ -27,6 +27,8 @@ Each task: ID, linked requirements, dependencies, files/modules, intended behavi
 ## 4. Implementation
 Reproduce bugs before editing. Use TDD for risky behavior: failing test for the intended behavior → minimal correct implementation → passing test → refactor. For low-risk changes, targeted verification may be enough. Preserve project conventions and user changes. Handle errors completely; no mock buttons, fake backend success, unfinished UX or unexplained placeholders. Resolve merge conflicts by preserving both sides' intent and verifying the result.
 
+Remove imports, variables or functions made unused by the current change only after checking dependencies, public entry points, registrations, callbacks and loading by name. No direct callers is not proof of dead code. Leave pre-existing or uncertain dead code outside the patch; report relevant findings separately rather than deleting without authorization. This does not require a separate cleanup phase or document.
+
 ## 5. Evidence ledger
 Place verification.md next to the spec, or use the project's established system.
 
@@ -40,7 +42,17 @@ Issue record: ID, deduplicated sources, affected REQ, severity, confidence, loca
 ## 6. Review and convergence
 Compare implementation to requirements and inspect actual diffs. Review authn/authz separately; examine error paths, transactions, idempotency, concurrency, secret handling, injection, dependencies and UX. Fix findings, then rerun tests affected by the fix. Escalate the scope only when there is evidence of systemic risk. Stop optional checking when acceptance and applicable gates pass.
 
+During this diff review, justify each changed block by a requirement, root-cause fix, necessary test, documentation update or dependency cleanup caused by the change. Exclude unrelated formatting, renaming and adjacent refactors introduced by this patch; never revert pre-existing user changes. Minimal means the smallest sufficient fix, not the fewest lines or files: include necessary cross-module changes and retain security and input validation. Use the existing review, not a per-line report or a new gate.
+
 Release verdict: READY only if every applicable required gate passes (or is explicitly justified N/A), no unresolved blockers remain, and evidence matches the candidate revision. Otherwise NOT_READY or INCOMPLETE with specific next action. A static scanner never emits READY.
+
+### Counterexample: a green test that misses the defect
+
+Example-only contract: scores decrease; tied ASCII names increase alphabetically. Both `[("Ada", 100), ("Zoe", 100), ("Miro", 80)]` and the wrong tie order `[("Zoe", 100), ("Ada", 100), ("Miro", 80)]` satisfy a score-only check against `[100, 100, 80]`. Checking those scores cannot establish the required tie order, however often the test runs.
+
+Verify the full expected identities/order/scores, using an expectation independent of the implementation. The [executable counterexample](../scripts/tests/test_workflow_counterexample.py) demonstrates the weak check accepting both results and the contract check rejecting wrong ties and damaged rows. The tie rule must come from the accepted requirement: alphabetical order is not implied by “fix sorting”; preserving input order can be a different valid contract. This synthetic example is not evidence of a reproduced application bug or measured agent improvement, and adds no mandatory mutation-testing framework.
+
+These two clarifications and the counterexample are original formulations informed by the review of [Karpathy-inspired guidelines and examples](https://github.com/multica-ai/andrej-karpathy-skills/tree/2c606141936f1eeef17fa3043a72095b4765b9c2); no upstream instructions or code are bundled.
 
 ## 7. Handoff
 Record: objective; current revision/branch; changes; decisions and constraints; key files; completed checks and artifact paths; unresolved issues; exact next action. Do not include secrets. Keep the report useful for an agent without prior chat. Update existing documents rather than generating contradictory versions.
