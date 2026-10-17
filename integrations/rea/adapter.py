@@ -32,6 +32,18 @@ OPERATIONS = {
     "compare-evidence": ("compare", False, False),
 }
 REQUEST_OPERATIONS = {"view", "feature-trace", "semantic-trace", "compare-applications"}
+# Do not trust 6.5.0's exact/complete labels for recovered Webpack exports.
+# Conservatively block the whole JS lane and mixed-origin derived workflows;
+# no heuristic can reliably prove an arbitrary package is unaffected.
+QUARANTINED_OPERATIONS = {
+    "javascript", "view", "feature-trace", "semantic-trace",
+    "compare-applications", "compare-evidence",
+}
+QUARANTINE_REASON = (
+    "REA 6.5.0 JS/export Evidence is quarantined: morluto/rea#3551 can omit "
+    "CommonJS exports while reporting complete coverage. A corrected exact "
+    "package and real regression qualification are required."
+)
 
 
 class AdapterError(ValueError):
@@ -104,14 +116,17 @@ def make_plan(operation: str, target: str, *, cli: str = "rea", selector: str | 
         args += ["--provider", "ghidra"]
     args.append("--json")
     supported = advertised_commands is not None and command in advertised_commands
+    blockers = [] if supported else ["Command support in the exact installed package has not been confirmed"]
+    if operation in QUARANTINED_OPERATIONS:
+        blockers.append(QUARANTINE_REASON)
     return {
         "schema_version": 1,
         "operation": operation,
         "argv": args,
         "package": "rea-agents@6.5.0",
         "execution_status": "NOT_RUN",
-        "readiness": "REQUIRES_HOST_REVIEW" if supported else "BLOCKED",
-        "blockers": [] if supported else ["Command support in the exact installed package has not been confirmed"],
+        "readiness": "BLOCKED" if blockers else "REQUIRES_HOST_REVIEW",
+        "blockers": blockers,
         "required_checks": ["exact package/dependency identity and local executable admission", "authorized target scope", "filesystem/network/process isolation appropriate to this host", "raw output and exit status retained"] + (["Ghidra + compatible Java, real provider probe"] if native else []),
         "product_readiness": "NOT_ASSESSED",
         "limits": ["argv is data, not execution authorization", "The command allowlist is not a sandbox", "Source main and the published package can have different capabilities"],
