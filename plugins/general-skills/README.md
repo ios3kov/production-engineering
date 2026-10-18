@@ -1,6 +1,10 @@
 # General Skills for ChatGPT Work and Codex
 
-An optional, cross-project set of eight **independent** Agent Skills. No changes to the existing `production-engineering` skill or the AE/AS project rules are required.
+An optional, cross-project set of nine **independent** Agent Skills. No changes to the existing `production-engineering` skill or the AE/AS project rules are required.
+
+## Version 1.3.0
+
+Adds `write-russian-ui` for Russian interface strings, with product-state and localization safeguards. Genjutsu gains optional typography, component-polish and web-library-selection guidance; Motion Design gains focused UI recipes. The [five-source supplement](references/ui-refinement-sources.md) records the inspected revisions and deliberate adaptations. The six other skills retain their contents. No new executable resources or plugin dependencies are bundled. Source publication and an installed client's refresh remain separate operations.
 
 ## Version 1.2.0
 
@@ -15,6 +19,7 @@ Adds scoped UI resilience, working-variant previews, interruption-aware motion, 
 | `design-dna` | Extracting and applying a design system from visual references |
 | `genjutsu` | Art direction, polish, visual QA and accessibility |
 | `motion-design` | Motion principles, timing, choreography and critique |
+| `write-russian-ui` | Russian UI labels, hints, errors and empty, loading or permission states |
 | `gsap` | GSAP / ScrollTrigger web animation |
 | `threejs` | Three.js / browser 3D |
 | `brainstorming` | Finding non-obvious, genuinely different ideas |

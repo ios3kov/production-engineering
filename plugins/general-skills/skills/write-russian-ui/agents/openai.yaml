@@ -1,0 +1,4 @@
+interface:
+  display_name: "Русские тексты интерфейса"
+  short_description: "Понятные русские кнопки, подсказки и ошибки"
+  default_prompt: "Используй $write-russian-ui, чтобы улучшить русские тексты этого экрана."

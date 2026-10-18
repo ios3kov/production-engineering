@@ -1,14 +1,14 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "general-skills",
-  "version": "1.2.0",
-  "description": "Eight optional skills for creative direction, visual design, motion, GSAP, Three.js, brainstorming, deep research and claim verification in ChatGPT Work and Codex.",
+  "version": "1.3.0",
+  "description": "Nine optional skills for creative direction, visual design, motion, Russian UI copy, GSAP, Three.js, brainstorming, deep research and claim verification in ChatGPT Work and Codex.",
   "extensions": {
     "com.openai": {
       "interface": {
         "displayName": "General Skills",
-        "shortDescription": "Design, motion, ideas and research",
-        "longDescription": "Eight focused, optional reusable skills that complement Production Engineering. Choose skills by task; they do not run globally on every request.",
+        "shortDescription": "Design, motion, UI copy and research",
+        "longDescription": "Nine focused, optional reusable skills that complement Production Engineering. Choose skills by task; they do not run globally on every request.",
         "developerName": "ios3kov",
         "category": "Productivity",
         "websiteURL": "https://github.com/ios3kov/production-engineering"
