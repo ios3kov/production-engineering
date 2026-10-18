@@ -90,7 +90,7 @@ python3 scripts/deep_audit.py /absolute/project --url https://example.com/ --pol
 
 ## Дополнительные Skills для Work и Codex
 
-В [General Skills](plugins/general-skills/README.md) собраны 8 независимых навыков для дизайна, анимации, генерации идей, исследований и проверки фактов. Они доступны как отдельный плагин через [маркетплейс](.agents/plugins/marketplace.json), не меняют корневой Production Engineering и не активируются без установки. Инструкция по подключению — в README плагина.
+В [General Skills](plugins/general-skills/README.md) собраны 9 независимых навыков для дизайна, анимации, русских UI-текстов, генерации идей, исследований и проверки фактов. Они доступны как отдельный плагин через [маркетплейс](.agents/plugins/marketplace.json), не меняют корневой Production Engineering и не активируются без установки. Инструкция по подключению — в README плагина.
 
 ## Product Intelligence для Work и Codex
 

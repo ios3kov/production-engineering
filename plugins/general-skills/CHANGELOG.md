@@ -1,5 +1,15 @@
 # General Skills changelog
 
+## 1.3.0 — Unreleased
+
+Add one independent skill, `write-russian-ui`, for Russian interface strings. It preserves product behavior, localization keys and ICU structure, follows the requested review/edit mode and the product's editorial style, and defaults to one recommended version. Its state examples are independently written.
+
+Extend Genjutsu with optional typography and component-polish checks plus a conditional web-library lookup. Extend Motion Design with focused recipes for anchored surfaces, operation feedback, moving indicators and gesture dismissal. Reuse the existing UI-resilience and interruption/profiling guidance. The six other General Skills retain their contents.
+
+The [source supplement](references/ui-refinement-sources.md) pins the five reviewed upstream skills and records omissions. No upstream source files, scripts, assets, automatic installation or universal aesthetic/performance thresholds are added. Package metadata advances to nine skills and version 1.3.0; publication does not establish client installation or activation.
+
+Validation uses the existing package, local-reference and content regression checks. Realistic synthetic agent scenarios examine copy-contract preservation and scoped UI advice; their results are behavioral samples, not comparative evidence of general quality or actual application rendering. Exact execution results belong to the pull request and its CI.
+
 ## 1.2.0 — 2026-10-17
 
 Extend genjutsu, motion-design and design-dna with the accepted practices from the nine-source review. Preserve the earlier visual-production guidance and five unrelated skills. Purpose-led composition and truthful demonstrations; real-input stress and preview variants; recovery/copy; interruption and profiling; authorized reference research. Sources, exclusions and access boundaries are kept in optional local references. No global instruction injection, external API, binary helper, motion score or new plugin dependency.

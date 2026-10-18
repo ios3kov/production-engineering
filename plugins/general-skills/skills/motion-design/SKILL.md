@@ -22,6 +22,8 @@ For interactive transitions, consult [motion interruption and profiling](../../r
 
 ## Heuristics, not hard rules
 
+For a concrete interface transition, use the relevant [UI motion recipe](references/ui-motion-recipes.md) alongside the interruption checks above. The recipes cover origin, state feedback, moving indicators and gesture dismissal; they do not set a universal easing curve, duration or button scale.
+
 - Ease-in / ease-out usually reads more naturally for spatial motion than constant speed. Linear is appropriate for constant-rate rotation, progress, and intentionally mechanical movement.
 - Keep interface feedback fast enough not to block tasks; reserve long sequences for intentional storytelling.
 - Animate transforms and opacity where possible on the web; avoid unnecessary layout reflows.

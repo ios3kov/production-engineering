@@ -30,6 +30,8 @@ For campaigns, covers, posters, product visuals and new visual concepts, read [v
 
 For interactive UI or a product page, use the relevant sections of [interface practice](../../references/interface-practice.md): identify the screen's job, stress real component inputs, compare working variants in a separate preview, preserve drafts through recoverable errors, and separate measured layout defects from taste. Use honest product demonstrations rather than decorative claims. Reuse the workflow above; a small correction does not trigger a full redesign. Sources and explicit exclusions are in [the adoption register](../../references/interface-sources.md).
 
+For interface typography or component polish, consult only the relevant checks in [typography and UI polish](../../references/ui-typography-and-polish.md). Its web-library lookup applies only when a component capability actually needs a dependency decision. For Russian interface wording, use [Write Russian UI](../write-russian-ui/SKILL.md) when the copy itself is in scope. These supplements preserve existing tokens and product behavior; they do not require a whole-screen audit for a label correction.
+
 ## Guardrails
 
 Aesthetic prescriptions are recommendations, not absolute laws. Avoid mandatory multi-question interviews for straightforward work. Never claim 60 fps, accessibility conformance or platform correctness without applicable tests. Don't add dependencies, replace design systems or redesign unrelated pages merely to make them prettier.
